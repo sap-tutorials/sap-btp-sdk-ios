@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/sap-tutorials/sap-btp-sdk-ios)](https://api.reuse.software/info/github.com/sap-tutorials/sap-btp-sdk-ios)
+
 # SAP-Tutorials Repository Template
 
 Default templates for SAP open source repositories, including LICENSE, .reuse/dep5, Code of Conduct, etc... All repositories on github.com/SAP-tutorials will be created based on this template.
