@@ -4,7 +4,7 @@ description: Configure multiple themes on SAP Mobile Services cockpit for apps t
 auto_validation: true
 primary_tag: software-product>sap-btp-sdk-for-ios
 tags: [  tutorial>beginner, operating-system>ios, topic>mobile, programming-tool>odata, software-product>sap-business-technology-platform, software-product>sap-mobile-services]
-time: 30
+time: 60
 author_name: Sandeep T D S
 author_profile: https://github.com/sandeep-tds
 ---
@@ -46,10 +46,10 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
     | Name  | Download Link |
     |---|---|
-    | Air Line 1 Light Theme | [Download](/airline_theme_1_light.zip) |
-    | Air Line 1 Dark Theme | [Download](/airline_theme_1_dark.zip) |
-    | Air Line 2 Light Theme | [Download](/airline_theme_2_light.zip) |
-    | Air Line 2 Dark Theme | [Download](/airline_theme_2_dark.zip) |
+    | Air Line 1 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EdknqYa1vZtKi1yzW5W6do4BnlK0SAIC6pntAHSbqe1_UQ?e=aC7aoO) |
+    | Air Line 1 Dark Theme | [Download]([/airline_theme_1_dark.zip](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EbW2CwO5A5tBpEqoJCF8IBwBc-qBkAAFTVQCI7HRxiaPjw?e=dpxtjr)) |
+    | Air Line 2 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWcws1WQbghIrcLnD1N-lUMBvWeMNHozB9Il8yXplQFPXw?e=2pNWlC) |
+    | Air Line 2 Dark Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWV_2hu7Ud1NhUdYBoXXX3oBFKOH9MtD47PuP-H-sEFwDw?e=teQPHG) |
 
 > You can create custom themes using the UI Theme designer. Click [here](cp-portal-freestyle-site-brand-site) to learn how to create custom themes using the UI Theme Designer on SAP Cloud Portal service.
 
