@@ -47,7 +47,7 @@ You anticipate selling the software to more airlines in the future. Therefore, y
     | Name  | Download Link |
     |---|---|
     | Air Line 1 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EdknqYa1vZtKi1yzW5W6do4BnlK0SAIC6pntAHSbqe1_UQ?e=aC7aoO) |
-    | Air Line 1 Dark Theme | [Download]([/airline_theme_1_dark.zip](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EbW2CwO5A5tBpEqoJCF8IBwBc-qBkAAFTVQCI7HRxiaPjw?e=dpxtjr)) |
+    | Air Line 1 Dark Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EbW2CwO5A5tBpEqoJCF8IBwBc-qBkAAFTVQCI7HRxiaPjw?e=dpxtjr) |
     | Air Line 2 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWcws1WQbghIrcLnD1N-lUMBvWeMNHozB9Il8yXplQFPXw?e=2pNWlC) |
     | Air Line 2 Dark Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWV_2hu7Ud1NhUdYBoXXX3oBFKOH9MtD47PuP-H-sEFwDw?e=teQPHG) |
 
