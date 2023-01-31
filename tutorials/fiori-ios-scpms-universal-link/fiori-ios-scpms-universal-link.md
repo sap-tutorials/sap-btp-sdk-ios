@@ -20,7 +20,7 @@ In this tutorial, you will learn how to create universal links for use in an iOS
 
 To prepare your app to support universal links, you will learn two different ways to create a new (or modify an existing) app ID. You will then modify the application definition on SAP Mobile Services.
 
-For this tutorial, you can use any iOS app you have previously created with the SAP BTP SDK Assistant for iOS. However, the screenshots and parameters used in this tutorial are taken from the `TutorialApp` app created in tutorial [Create a Sample App](fiori-ios-scpms-create-sample-app).
+For this tutorial, you can use any iOS app you have previously created with the SAP BTP SDK Assistant for iOS.
 
 [Universal Links for Developers](https://developer.apple.com/ios/universal-links/)
 
