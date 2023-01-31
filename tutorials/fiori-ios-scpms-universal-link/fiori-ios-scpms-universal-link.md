@@ -9,7 +9,8 @@ time: 25
 
 ## Prerequisites  
 
-- **Tutorials:** [Get a Free Trial Account on SAP BTP](hcp-create-trial-account) and [Enable SAP Mobile Services](fiori-ios-hcpms-setup)
+- [Set Up SAP BTP SDK for iOS](sdk-ios-setup)
+- [Created Your First App using SAP BTP SDK Assistant for iOS](sdk-ios-assistant-app)
 - **Development environment:** Apple Mac running macOS Catalina or higher with Xcode 11 or higher
 - **SAP BTP SDK for iOS:** Version 4.0.10
 
