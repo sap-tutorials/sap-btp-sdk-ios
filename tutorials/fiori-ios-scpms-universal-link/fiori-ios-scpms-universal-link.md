@@ -2,7 +2,7 @@
 title: Create Universal Links for iOS Apps
 description: Modify an SAP BTP SDK for iOS app to accept universal links. This allows users to navigate to your app via a URL sent by email or from a website.
 auto_validation: true
-primary_tag: products>ios-sdk-for-sap-btp
+primary_tag: products>sap-btp-sdk-for-ios
 tags: [  tutorial>intermediate, operating-system>ios, topic>mobile, products>sap-business-technology-platform, products>sap-mobile-services ]
 time: 25
 ---
