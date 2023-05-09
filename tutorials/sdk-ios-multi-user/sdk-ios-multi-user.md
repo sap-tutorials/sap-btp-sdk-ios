@@ -19,7 +19,7 @@ author_profile: https://github.com/sandeep-tds
 
 ### You will learn
 
-- How to create a native iOS application that supports multiple users on the same device
+- How to create an offline enabled native iOS application that supports multiple users on the same device
 
 ---
 
@@ -36,7 +36,7 @@ In this tutorial, you will learn how to enhance your [SAP BTP SDK for iOS Assist
 
 [ACCORDION-BEGIN [Step 2: ](Enable multi-user mode in mobile services cockpit)]
 
-1. In your mobile services account, click Mobile Applications &rarr; Native/Hybrid &rarr; **<Your Mobile Application configuration>**.
+1. In your mobile services account, click Mobile Applications &rarr; Native/Hybrid &rarr; **< Your Mobile Application configuration >**.
 
     ![Mobile Service Cockpit App Config](img_2_1.png)
 
@@ -50,7 +50,7 @@ In this tutorial, you will learn how to enhance your [SAP BTP SDK for iOS Assist
 
     ![Mobile Settings Exchange](img_2_3.png)
 
-    > You must enable this checkbox if you are building an offline capable multi-user application.
+    > A multi-user application needs to be an offline-enabled app so that the local store can be used to preserve user data.
 
 [VALIDATE_2]
 [ACCORDION-END]
@@ -96,11 +96,50 @@ In the given scenario any pending changes done by a user should be uploaded befo
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 4: ](Configure app parameters)]
+[ACCORDION-BEGIN [Step 4: ](Create an Xcode project using SAP BTP SDK Assistant for iOS)]
+
+1. Launch SAP BTP SDK Assistant for iOS.
+
+2. Click **Create New** located near the bottom left corner.
+
+3. Click **Reuse Existing Application** in the project template step.
+
+4. Select the SAP Mobile Services account in which you created the server side configuration and click **Next**.
+
+5. Use your SAP BTP credentials to complete the SSO login.
+
+6. Select the app you created in the earlier step and click **Next**.
+
+7. Use the following table to fill the project details requested in the *Provide the Xcode project configuration* step of the assistant, and click **Next**.
+
+    | Key | Value |
+    |---|---|
+    |Product Name|**`ios-multiuser-app`**|
+    |Organisation Name|**`SAP`**|
+    |Organisation Identifier|**`com.sap`**|
+    |Bundle Identifier|*Auto generated*|
+    |Path|*No Change*|
+    |Mac Catalyst|*No Change*|
+
+8. Ensure `com.sap.edm.sampleservice.v2`is present in the *Configure the Proxy class generation process* step of the assistant, and click **Next**.
+
+9. Use the following table to configure the settings in the *Configure the UI generation for the mobile application* step of the assistant, and click **Finish**.
+
+    | Key | Value |
+    |---|---|
+    |Onboarding|**Enabled**|
+    |Master/Detail Screens for all Destinations|**Enabled**|
+    |Application Extension|**Disabled**|
+    |Enable Multi-Window Support|*No (`AppDelegate` only)*|
+
+    > After the project generation process is completed, the Xcode project will open. If prompted, click **Trust and Open** in the warning pop-up.
+
+[DONE]
+[ACCORDION-END]
+
+[ACCORDION-BEGIN [Step 5: ](Configure app parameters)]
 
 1. In Xcode, Open **`AppParameters.plist`**.
-
-    > Ensure that you have completed the prerequisites before starting this step.
 
 2. Add a new parameter by providing the following key/value.
 
@@ -108,33 +147,31 @@ In the given scenario any pending changes done by a user should be uploaded befo
     |  :------------- | :------------- | :------------- |
     |  User Mode | String | Multiple |
 
-      ![AppParameters.plist Xcode View](img_4_2.png)  
+    ![AppParameters.plist Xcode View](img_4_2.png)  
 
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 5: ](Modify AppDelegate for multi-user onboarding flow)]
+[ACCORDION-BEGIN [Step 5: ](Modify AppDelegate for multi-user callbacks)]
 
 1. Open `AppDelegate.swift`.
 
-2. Add a public variable to track user change status.
+2. Add a public variable `userDidChange`.
 
     ```swift
-    public var userDidChange = false
+    // Boolean to ensure addUser/switchUser happened
+    private var userDidChange = false
     ```
 
 3. Replace the `applicationWillEnterForeground` function with the given code to trigger multi-user flow.
 
     ```Swift
     func applicationWillEnterForeground(_: UIApplication) {
-        // Triggers to show the multi-user passcode screen
-        OnboardingSessionManager.shared.unlock() { error in
-            guard let error = error else {
-                if self.userDidChange {
-                    self.afterOnboard()
-                    self.userDidChange = false
-                }
-                return
+        // Triggers to show the passcode screen
+        OnboardingSessionManager.shared.unlock { error in
+            if self.userDidChange {
+                self.afterOnboard()
+                self.userDidChange = false
             }
 
             self.onboardingErrorHandler?.handleUnlockingError(error)
@@ -142,47 +179,32 @@ In the given scenario any pending changes done by a user should be uploaded befo
     }
     ```
 
-4. Replace the `initializeOnboarding` function with the following code to configure `OnboardingSessionManager` which includes `MultiUserOnboardingIDManager`.
+4. Replace the `initializeOnboarding` function with the following code to configure `OnboardingSessionManager` with `MultiUserOnboardingIDManager`.
 
     ```Swift
     func initializeOnboarding() {
-        let presentationDelegate = ApplicationUIManager(window: self.window!)
-        self.onboardingErrorHandler = OnboardingErrorHandler()
-        self.sessionManager = OnboardingSessionManager(presentationDelegate: presentationDelegate, flowProvider: self.flowProvider, onboardingIDManager: MultiUserOnboardingIDManager(), delegate: self.onboardingErrorHandler)
+        let presentationDelegate = ApplicationUIManager(window: window!)
+        onboardingErrorHandler = OnboardingErrorHandler()
+        sessionManager = OnboardingSessionManager(presentationDelegate: presentationDelegate, flowProvider: flowProvider, onboardingIDManager: MultiUserOnboardingIDManager(), delegate: onboardingErrorHandler)
+        presentationDelegate.isOnboarding = true
         presentationDelegate.showSplashScreenForOnboarding { _ in }
 
-        self.onboardUser()
+        onboardUser()
     }
     ```
 
-[DONE]
-[ACCORDION-END]
+5. Add an extension for `AppDelegate` for multi-user callbacks.
 
-[ACCORDION-BEGIN [Step 6: ](Configure multi-user callbacks)]
-
-1. Open **`OnboardingFlowProvider`**.
-
-2. Add a new extension for `FUIPasscodeControllerDelegate` by pasting the following code block for multi-user callbacks:
-
-    ```Swift
-    extension OnboardingFlowProvider: FUIPasscodeControllerDelegate {
-        public func shouldTryPasscode(_ passcode: String, forInputMode inputMode: FUIPasscodeInputMode, fromController passcodeController: FUIPasscodeController) throws {
-            print("Called shouldTryPasscode")
+    ```swift
+    extension AppDelegate: UserEventObserving {
+        func userAdded(with onboardingID: UUID) {
+            logger.debug("Called: userAdded")
+            self.userDidChange = true
         }
 
-        public func shouldResetPasscode(fromController passcodeController: FUIPasscodeController) {
-            print("Called shouldResetPasscode")
-        }
-
-
-        public func addNewUser(_ passcodeController: FUIPasscodeController) {
-            print("Called addNewUser")
-            AppDelegate.shared.userDidChange = true
-        }
-
-        public func switchUser(_ newUserId: String, passcodeController: FUIPasscodeController) {
-            print("Called switchUser")
-            AppDelegate.shared.userDidChange = true
+        func userSwitched(to onboardingID: UUID) {
+            logger.debug("Called: userSwitched")
+            self.userDidChange = true
         }
     }
     ```
@@ -190,264 +212,292 @@ In the given scenario any pending changes done by a user should be uploaded befo
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 7: ](Modify onboarding and restore steps)]
+[ACCORDION-BEGIN [Step 6: ](Modify OnboardingFlowProvider for reset passcode flow)]
 
-1. In `OnboardingFlowProvider`, add a new function called **`configuredStoreManagerStep`**.
+1. Open `OnboardingFlowProvider.swift`.
 
-    ```Swift
-    private func configuredStoreManagerStep() -> StoreManagerStep {
-        let st = StoreManagerStep()
-        st.userPasscodeControllerDelegate = self
-        return st
+2. Replace the `flow` function with the given code to add a `resetPasscode` case.
+
+    ```swift
+    public func flow(for _: OnboardingControlling, flowType: OnboardingFlow.FlowType, completionHandler: @escaping (OnboardingFlow?, Error?) -> Void) {
+        switch flowType {
+        case .onboard:
+            completionHandler(onboardingFlow(), nil)
+        case let .restore(onboardingID):
+            completionHandler(restoringFlow(for: onboardingID), nil)
+        case .background:
+            completionHandler(nil, nil)
+        case let .reset(onboardingID):
+            completionHandler(resettingFlow(for: onboardingID), nil)
+        case let .resetPasscode(onboardingID):
+            completionHandler(resetPasscodeFlow(for: onboardingID), nil)
+        @unknown default:
+            break
+        }
     }
     ```
 
-2. Replace the calls for `StoreManagerStep()` with `configuredStoreManagerStep()` in `onboardingSteps`and `restoringSteps` to onboard a new user or restore the session of a previously logged in user.
+3. Add a new function `resetPasscodeFlow`.
 
-    ```Swift
-    public var onboardingSteps: [OnboardingStep] {
-            return [
-                self.configuredWelcomeScreenStep(),
-                CompositeStep(steps: SAPcpmsDefaultSteps.configuration),
-                OAuth2AuthenticationStep(),
-                CompositeStep(steps: SAPcpmsDefaultSteps.settingsDownload),
-                CompositeStep(steps: SAPcpmsDefaultSteps.applyDuringOnboard),
-                self.configuredUserConsentStep(),
-                self.configuredDataCollectionConsentStep(),
-                configuredStoreManagerStep(),
-                ODataOnboardingStep(),
-            ]
-        }
-
-        public var restoringSteps: [OnboardingStep] {
-            return [
-                configuredStoreManagerStep(),
-                self.configuredWelcomeScreenStep(),
-                CompositeStep(steps: SAPcpmsDefaultSteps.configuration),
-                OAuth2AuthenticationStep(),
-                CompositeStep(steps: SAPcpmsDefaultSteps.settingsDownload),
-                CompositeStep(steps: SAPcpmsDefaultSteps.applyDuringRestore),
-                self.configuredDataCollectionConsentStep(),
-                ODataOnboardingStep(),
-            ]
-        }
+    ```swift
+    func resetPasscodeFlow(for onboardingID: UUID) -> OnboardingFlow {
+        let steps = resetPasscodeSteps
+        var context = OnboardingContext(presentationDelegate: OnboardingFlowProvider.modalUIViewControllerPresenter)
+        let flow = OnboardingFlow(flowType: .resetPasscode(onboardingID: onboardingID), context: context, steps: steps)
+        return flow
+    }
     ```
 
-    > Replace `onboardingSteps` & `restoringSteps` with the given code.
+4. Add a new public `resetPasscodeSteps` property.
+
+    ```swift
+    public var resetPasscodeSteps: [OnboardingStep] {
+        return onboardingSteps
+    }
+    ```
 
 [DONE]
 [ACCORDION-END]
 
-
-[ACCORDION-BEGIN [Step 8: ](Configure OData controller for offline scenarios)]
+[ACCORDION-BEGIN [Step 7: ](Provide path for offline store)]
 
 1. Open **`ODataControlling.Swift`**.
 
-2. Import `SAPOfflineOdata`
+2. Import `SAPOfflineOData`
 
     ```Swift
-        import SAPOfflineOData
+    import SAPOfflineOData
     ```
 
-3. Add a new protocol for `configureOData` function:
+3. Replace the `ODataControlling` protocol with the following code to add a new protocol for `configureOData`:
 
     ```Swift
-    func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL, onboardingID: UUID, offlineParameters: OfflineODataParameters) throws
+    public protocol ODataControlling {
+        func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL) throws
+        func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL, onboardingID: UUID) throws
+        func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL, onboardingID: UUID, offlineParameters: OfflineODataParameters) throws
+        func openOfflineStore(synchronize: Bool) async throws
+    }
     ```
 
-4. Open **`ODataOnboardingStep.Swift`**.
+4. Add `configureOData` method with `OfflineParameters` in `ODataControlling` extension.
 
-5. Import `SAPOfflineOdata`
-
-    ```Swift
-        import SAPOfflineOData
+    ```swift
+    func configureOData(sapURLSession _: SAPURLSession, serviceRoot _: URL, onboardingID _: UUID, offlineParameters: OfflineODataParameters) throws {
+        // OfflineODataController will override this default implementation.
+    }
     ```
 
-6. Add offline store name's key value.
+5. Create a new file `OfflineODataControllerError.swift` under `Frameworks` &rarr; `SharedFmwk`&rarr; `SharedFmwk`.
 
-    ```Swift
-        let offlineStoreNameKey: String = "SAP.OfflineOData.MultiUser"
-    ```
+6. Add the following code to the newly created `OfflineODataControllerError.swift` file.
 
-7. Add a new function **`offlineStoreID`** that generates a UUID if the offline store name is nil.
+    ```swift
+    import SAPCommon
 
-    ```Swift
-      private func offlineStoreID() -> UUID {
-         var offlineStoreName: String? = UserDefaults.standard.value(forKey: self.offlineStoreNameKey) as? String
-         if offlineStoreName == nil {
-             offlineStoreName = UUID().uuidString
-             UserDefaults.standard.set(offlineStoreName, forKey: self.offlineStoreNameKey)
-         }
-         let offlineStoreNameID: UUID = UUID(uuidString: offlineStoreName!)!
-         return offlineStoreNameID
-     }
-    ```
+    public enum OfflineODataControllerError: Error {
+        case cannotCreateOfflinePath
+        case storeClosed
+        case syncFailed
+    }
 
-8. Replace the `reset` function with the following code to pass the `offlineStoreID()`.
+    extension OfflineODataControllerError: SAPError {
+        public var description: String {
+            switch self {
+            case .cannotCreateOfflinePath:
+                return "OfflineODataControllerError.cannotCreateOfflinePath: Unable to create offline path."
+            case .storeClosed:
+                return "OfflineODataControllerError.storeClosed: Store is closed."
+            case .syncFailed:
+                return "OfflineODataControllerError.syncFailed: Sync has failed."
+            }
+        }
 
-    ```Swift
-    public func reset(context: OnboardingContext, completionHandler: @escaping () -> Void) {
-        defer { completionHandler() }
-        do {
-            try ESPMContainerOfflineODataController.removeStore(for: offlineStoreID())
-        } catch {
-            self.logger.error("Remove Offline Store failed", error: error)
+        public var debugDescription: String {
+            return description
+        }
+
+        public var errorDescription: String? {
+            return description
+        }
+
+        public var failureReason: String? {
+            return description
         }
     }
     ```
 
-9. Add a new function **`getOfflineODataParameters`** to determine the user who is logging in.
+7. Open **`ESPMContainerOfflineODataController.Swift`**.
 
-    ```Swift
-      private func getOfflineODataParameters(using context: OnboardingContext, completionnHandler: @escaping (OfflineODataParameters) -> Void) {
-          var currentUser: String? = nil
-          var forceUploadOnUserSwitch: Bool = false
-          var storeEncryptionKey: String? = nil
+8. Remove the `Error enum`.
 
-          if let onboardedUser = UserManager().get(forKey: context.onboardingID), let userId = onboardedUser.infoString {
-              currentUser = userId
-              storeEncryptionKey = try? context.credentialStore.get(String.self, for: EncryptionConfigLoader.encryptionKeyID)
-              if let enabled = (context.info[.sapcpmsSharedDeviceSettings] as? SAPcpmsSharedDeviceSettings)?.allowUploadPendingChangesFromPreviousUser {
-                  forceUploadOnUserSwitch = enabled
-              }
-              let offlineParameters = OfflineODataParameters()
-              offlineParameters.currentUser = currentUser
-              offlineParameters.forceUploadOnUserSwitch = forceUploadOnUserSwitch
-              offlineParameters.storeEncryptionKey = storeEncryptionKey
-              completionnHandler(offlineParameters)
-          } else {
-              fatalError("Failed to fetch user information!")
-          }
-      }
-    ```
-
-10. Replace the `configureOData` function with the following code to determine the user mode, and configure parameters accordingly.
-
-    ```Swift
-    private func configureOData(using context: OnboardingContext, completionHandler: @escaping (OnboardingResult) -> Void) {
-      let semaphore: DispatchSemaphore =  DispatchSemaphore(value: 0)
-
-      var offlineParameters: OfflineODataParameters = OfflineODataParameters()
-      if UserManager.userMode == .multiUser {
-          self.getOfflineODataParameters(using: context) { parameters in
-              offlineParameters = parameters
-              semaphore.signal()
-          }
-      }
-      semaphore.wait()
-      let banner = topBanner()
-      let group = DispatchGroup()
-      var odataControllers = [String: ODataControlling]()
-      let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
-
-      let eSPMContainerOfflineODataDelegateSample = OfflineODataDelegateSample(for: "ESPMContainer", with: banner)
-      odataControllers[ODataContainerType.eSPMContainer.description] = ESPMContainerOfflineODataController(delegate: eSPMContainerOfflineODataDelegateSample)
-
-      for (odataServiceName, odataController) in odataControllers {
-          group.enter()
-          let destinationId = destinations[odataServiceName] as! String
-          // Adjust this path so it can be called after authentication and returns an HTTP 200 code. This is used to validate the authentication was successful.
-          let configurationURL = URL(string: (context.info[.sapcpmsSettingsParameters] as! SAPcpmsSettingsParameters).backendURL.appendingPathComponent(destinationId).absoluteString)!
-
-          do {
-              try odataController.configureOData(sapURLSession: context.sapURLSession, serviceRoot: configurationURL, onboardingID: offlineStoreID(), offlineParameters: offlineParameters)
-              let connectivityStatus = ConnectivityUtils.isConnected()
-              self.logger.info("Network connectivity status: \(connectivityStatus)")
-              odataController.openOfflineStore(synchronize: connectivityStatus) { error in
-                  if let error = error {
-                      completionHandler(.failed(error))
-                      return
-                  }
-                  self.controllers[odataServiceName] = odataController
-                  group.leave()
-              }
-          } catch {
-              completionHandler(.failed(error))
-          }
-      }
-      group.notify(queue: .main) {
-          completionHandler(.success(context))
-      }
+    ```swift
+    enum Error: Swift.Error {
+        case cannotCreateOfflinePath
+        case storeClosed
     }
     ```
 
-[DONE]
-[ACCORDION-END]
+9. Replace the `offlineStorePath` function with the following code to use `OfflineODataControllerError`:
 
-[ACCORDION-BEGIN [Step 9: ](Handle offline OData sync failure)]
-
-1. Open `ESPMContainerOfflineODataController.Swift`
-
-2. Update the error cases to include `syncFailed`
-
-    ```Swift
-      public enum Error: Swift.Error {
-          case cannotCreateOfflinePath
-          case storeClosed
-          case syncFailed
-      }
+    ```swift
+    public static func offlineStorePath(for onboardingID: UUID) throws -> URL {
+        guard let documentsFolderURL = FileManager.default.urls(for: FileManager.SearchPathDirectory.documentDirectory, in: FileManager.SearchPathDomainMask.userDomainMask).first else {
+            throw OfflineODataControllerError.cannotCreateOfflinePath
+        }
+        let offlineStoreURL = documentsFolderURL.appendingPathComponent(onboardingID.uuidString).appendingPathComponent("ESPMContainer")
+        return offlineStoreURL
+    }
     ```
 
-3. Replace the `configureOData` function with the following code to accept `OfflineODataParameters`.
+10. Add a new function `createStore`.
 
-    ```Swift
-    public func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL, onboardingID: UUID, offlineParameters: OfflineODataParameters = OfflineODataParameters()) throws {
-        offlineParameters.enableRepeatableRequests = true
-
-        // Configure the path of the Offline Store
-        let offlinePath = try ESPMContainerOfflineODataController.offlineStorePath(for: onboardingID)
+    ```swfit
+    public static func createStore(for onboardingID: UUID) throws -> URL {
+        let offlinePath = try offlineStorePath(for: onboardingID)
         try FileManager.default.createDirectory(at: offlinePath, withIntermediateDirectories: true)
-        offlineParameters.storePath = offlinePath
+        return offlinePath
+    }
+    ```
+
+11. Replace the `configureOData` function with the following code to use the `createStore` function:
+
+    ```swift
+    public func configureOData(sapURLSession: SAPURLSession, serviceRoot: URL, onboardingID: UUID, offlineParameters: OfflineODataParameters) throws {
+        // Configure the path of the Offline Store
+        offlineParameters.storePath = try ESPMContainerOfflineODataController.createStore(for: onboardingID)
 
         // Setup an instance of delegate. See sample code below for definition of OfflineODataDelegateSample class.
         let offlineODataProvider = try! OfflineODataProvider(serviceRoot: serviceRoot, parameters: offlineParameters, sapURLSession: sapURLSession, delegate: delegate)
         try configureDefiningQueries(on: offlineODataProvider)
-        self.dataService = ESPMContainer(provider: offlineODataProvider)
+        dataService = ESPMContainer(provider: offlineODataProvider.syncProvider)
     }
-    ```
-
-4. Replace the `openOfflineStore` function with the following code to catch the sync error.
-
-    ```Swift
-      public func openOfflineStore(synchronize: Bool, completionHandler: @escaping (Swift.Error?) -> Void) {
-        if !self.isOfflineStoreOpened {
-            // The OfflineODataProvider needs to be opened before performing any operations.
-            self.dataService.open { error in
-                if let error = error {
-                    self.logger.error("Could not open offline store.", error: error)
-                    if (error.code == -10425 || error.code == -10426) {
-                        completionHandler(Error.syncFailed)
-                    } else {
-                        completionHandler(error)
-                    }
-                    return
-                }
-                self.isOfflineStoreOpened = true
-                self.logger.info("Offline store opened.")
-                if synchronize {
-                    // You might want to consider doing the synchronization based on an explicit user interaction instead of automatically synchronizing during startup
-                    self.synchronize(completionHandler: completionHandler)
-                } else {
-                    completionHandler(nil)
-                }
-            }
-        } else if synchronize {
-            // You might want to consider doing the synchronization based on an explicit user interaction instead of automatically synchronizing during startup
-            self.synchronize(completionHandler: completionHandler)
-        } else {
-            completionHandler(nil)
-        }
-      }
     ```
 
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 10: ](Multi-user error handling)]
+[ACCORDION-BEGIN [Step 8: ](Configure offline store)]
+
+1. Create a new file `OfflineOdataMultiUserUtils.swift` under `<Project Name>` &rarr; `Utils`.
+
+2. Add the following code to the newly created `OfflineOdataMultiUserUtils.swift` file.
+
+    ```swift
+    import SAPFoundation
+    import SAPOfflineOData
+    import SAPFioriFlows
+
+    class OfflineODataMultiuserUtils {
+        private static let offlineStoreNameKey: String = "SAP.OfflineOData.MultiUser"
+        
+        static func getOfflineODataParameters(using context: OnboardingContext) -> OfflineODataParameters {
+            if UserManager.userMode == .multiUser,
+                let onboardedUser = UserManager().get(forKey: context.onboardingID),
+                let userId = onboardedUser.infoString {
+                let offlineParameters = OfflineODataParameters()
+                offlineParameters.storeEncryptionKey = try? context.credentialStore.get(String.self, for: EncryptionConfigLoader.encryptionKeyID)
+                if let enabled = (context.info[.sapcpmsSharedDeviceSettings] as? SAPcpmsSharedDeviceSettings)?.allowUploadPendingChangesFromPreviousUser, enabled {
+                    offlineParameters.forceUploadOnUserSwitch = enabled
+                    offlineParameters.currentUser = userId
+                }
+                return offlineParameters
+            } else {
+                fatalError("Failed to fetch user information!")
+            }
+        }
+        
+        static func offlineStoreID() -> UUID {
+            var offlineStoreName: String? = UserDefaults.standard.value(forKey: self.offlineStoreNameKey) as? String
+            if offlineStoreName == nil {
+                offlineStoreName = UUID().uuidString
+                UserDefaults.standard.set(offlineStoreName, forKey: self.offlineStoreNameKey)
+            }
+            let offlineStoreNameID: UUID = UUID(uuidString: offlineStoreName!)!
+            return offlineStoreNameID
+        }
+    }
+    ```
+
+3. Open **`ODataOnboardingStep.Swift`**.
+
+4. Import `SAPOfflineOData`
+
+    ```Swift
+    import SAPOfflineOData
+    ```
+
+5. Replace the `reset` function with the following code to use `OfflineODataMultiuserUtils`.
+
+    ```swift
+    public func reset(context: OnboardingContext, completionHandler: @escaping () -> Void) {
+        defer { completionHandler() }
+        do {
+            try ESPMContainerOfflineODataController.removeStore(for: OfflineODataMultiuserUtils.offlineStoreID())        
+        } catch {
+            logger.error("Remove Offline Store failed", error: error)
+        }
+    }
+    ```
+
+6. Add `resetPasscode` function.
+
+    ```swift
+    public func resetPasscode(context: OnboardingContext, completionHandler: @escaping (OnboardingResult) -> Void) {
+        configureOData(using: context, completionHandler: completionHandler)
+    }
+    ```
+
+7. Replace the `configureOData` function with the following code to pass the `offlineStore` parameters:
+
+    ```swift
+    private func configureOData(using context: OnboardingContext, completionHandler: @escaping (OnboardingResult) -> Void) {
+        let banner = topBanner()
+        let group = DispatchGroup()
+        var odataControllers = [String: ODataControlling]()
+        let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
+
+        let eSPMContainerOfflineODataDelegateSample = OfflineODataDelegateSample(for: "ESPMContainer", with: banner)
+        odataControllers[ODataContainerType.eSPMContainer.description] = ESPMContainerOfflineODataController(delegate: eSPMContainerOfflineODataDelegateSample)
+
+        for (odataServiceName, odataController) in odataControllers {
+            group.enter()
+            let destinationId = destinations[odataServiceName] as! String
+            // Adjust this path so it can be called after authentication and returns an HTTP 200 code. This is used to validate the authentication was successful.
+            let configurationURL = URL(string: (context.info[.sapcpmsSettingsParameters] as! SAPcpmsSettingsParameters).backendURL.appendingPathComponent(destinationId).absoluteString)!
+
+            do {
+                try odataController.configureOData(sapURLSession: context.sapURLSession, serviceRoot: configurationURL, onboardingID: OfflineODataMultiuserUtils.offlineStoreID(), offlineParameters: OfflineODataMultiuserUtils.getOfflineODataParameters(using: context))
+                let connectivityStatus = ConnectivityUtils.isConnected()
+                logger.info("Network connectivity status: \(connectivityStatus)")
+                Task.detached {
+                    do {
+                        try await odataController.openOfflineStore(synchronize: connectivityStatus)
+                    } catch {
+                        completionHandler(.failed(error))
+                        return
+                    }
+                    self.controllers[odataServiceName] = odataController
+                    group.leave()
+                }
+            } catch {
+                completionHandler(.failed(error))
+            }
+        }
+        group.notify(queue: .main) {
+            completionHandler(.success(context))
+        }
+    }
+    ```
+
+[DONE]
+[ACCORDION-END]
+
+[ACCORDION-BEGIN [Step 9: ](Handle Errors)]
 
 1. Open `OnboardingErrorHandler.swift`.
 
-2. Replace the `onboardingController` function with the following code to handle application specific error handling.
+2. Replace the `onboardingController` function with the following code to handle restore failed and reset passcode cases.
 
     ```swift
 
@@ -461,7 +511,6 @@ In the given scenario any pending changes done by a user should be uploaded befo
             completionHandler(.retry)
         }
     }
-
     ```
 
 3. Replace `onboardFailed` function with the given code to handle duplicate user in case of add user, user mismatch in case of reset passcode and `authenticationManager` related errors.
@@ -472,6 +521,8 @@ In the given scenario any pending changes done by a user should be uploaded befo
         case WelcomeScreenError.demoModeRequested:
             completionHandler(.stop(error))
             return
+        case ApplicationVersioningError.inactive:
+            showAlertWith(error: error)
         default:
             showAlertWith(error: error)
         }
@@ -483,36 +534,26 @@ In the given scenario any pending changes done by a user should be uploaded befo
                 preferredStyle: .alert
             )
             switch error {
-            
-            case SAPcpmsAuthenticationManagerError.userSwitch(from: let fromId, to: let toId):
-                
+            case SAPcpmsAuthenticationManagerError.userSwitch(from: _, to: let toId):
                 if let _ = UserManager().get(forKey: UUID(uuidString: toId)!) {
-                    
                     alertController.addAction(UIAlertAction(title: "Restore", style: .default) { _ in
                         self.switchToDuplicateUserWith(onboardingID: toId, completionHandler: completionHandler)
                     })
-                    
                 } else {
                     alertController.addAction(UIAlertAction(title: "Onboard", style: .default) { _ in
                         self.switchToDuplicateUserWith(onboardingID: nil, completionHandler: completionHandler)
                     })
                 }
-            case UserManagerError.userAlreadyExists(with: let onboardingID):
+            case UserManagerError.userAlreadyExists(with: let onboardingID): // only onboard; not restore or reset passcode
                 alertController.addAction(UIAlertAction(title: "Restore", style: .default) { _ in
                     self.switchToDuplicateUserWith(onboardingID: onboardingID, completionHandler: completionHandler)
                 })
-            case UserManagerError.userMismatch(with: let id):
-                if let idNotNil = id {
-                    alertController.addAction(UIAlertAction(title: "Restore", style: .default) { _ in
-                        self.switchToDuplicateUserWith(onboardingID: idNotNil, completionHandler: completionHandler)
-                    })
-
-                } else {
-                    alertController.addAction(UIAlertAction(title: "Onboard", style: .default) { _ in
-                        self.switchToDuplicateUserWith(onboardingID: nil, completionHandler: completionHandler)
-                    })
-
-                }
+            case ApplicationVersioningError.inactive:
+                alertController.title = LocalizedStrings.Onboarding.failedToLogonTitle
+                alertController.message = error.localizedDescription
+                alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.retryTitle, style: .default) { _ in
+                    completionHandler(.retry)
+                })
             default:
                 alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.retryTitle, style: .default) { _ in
                     completionHandler(.retry)
@@ -532,24 +573,21 @@ In the given scenario any pending changes done by a user should be uploaded befo
 4. Replace `restoreFailed` function with the given code to handle multi-user errors during restore.
 
     ```swift
-    private func restoreFailed(with error: Error, controller: OnboardingControlling, onboardingID: UUID?, completionHandler: @escaping (OnboardingErrorDisposition) -> Void) {
+    private func restoreFailed(with error: Error, controller: OnboardingControlling, context: OnboardingContext, completionHandler: @escaping (OnboardingErrorDisposition) -> Void) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
 
         switch error {
         case StoreManagerError.cancelPasscodeEntry, StoreManagerError.skipPasscodeSetup, StoreManagerError.resetPasscode:
-            resetOnboarding(onboardingID, controller: controller, completionHandler: completionHandler)
+            resetOnboarding(context.onboardingID, controller: controller, completionHandler: completionHandler)
             return
         case StoreManagerError.passcodeRetryLimitReached:
             alertController.title = LocalizedStrings.Onboarding.passcodeRetryLimitReachedTitle
             alertController.message = LocalizedStrings.Onboarding.passcodeRetryLimitReachedMessage
-        case SAPcpmsAuthenticationManagerError.userSwitch(from: let fromId, to: let toId):
-            
+        case SAPcpmsAuthenticationManagerError.userSwitch(from: _, to: let toId):
             if let _ = UserManager().get(forKey: UUID(uuidString: toId)!) {
-                
                 alertController.addAction(UIAlertAction(title: "Restore", style: .default) { _ in
                     self.switchToDuplicateUserWith(onboardingID: toId, completionHandler: completionHandler)
                 })
-                
             } else {
                 alertController.addAction(UIAlertAction(title: "Onboard", style: .default) { _ in
                     self.switchToDuplicateUserWith(onboardingID: nil, completionHandler: completionHandler)
@@ -561,6 +599,29 @@ In the given scenario any pending changes done by a user should be uploaded befo
             alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.retryTitle, style: .default) { _ in
                 completionHandler(.retry)
             })
+        case OfflineODataControllerError.syncFailed:
+            let feedbackScreen = FUIFeedbackScreen.createInstanceFromStoryboard()
+            feedbackScreen.messageNameLabel.text = "Sample Error Screen"
+            feedbackScreen.messageDetailLabel.text = "Sample Label"
+            feedbackScreen.messageActionButton.setTitle("Sample Button Name", for: UIControlState.normal)
+            feedbackScreen.navigationController?.navigationBar.topItem?.title = "Error"
+            feedbackScreen.didTapActionButton = {
+                context.presentationDelegate.dismiss { error in
+                    if let error = error {
+                        completionHandler(.stop(error))
+                    } else {
+                        completionHandler(.retry)
+                    }
+                }
+            }
+            context.presentationDelegate.present(feedbackScreen) { error in
+                if let error = error {
+                    completionHandler(.stop(error))
+                } else {
+                    completionHandler(.retry)
+                }
+            }
+            return
         default:
             alertController.title = LocalizedStrings.Onboarding.failedToLogonTitle
             alertController.message = error.localizedDescription
@@ -570,7 +631,7 @@ In the given scenario any pending changes done by a user should be uploaded befo
         }
 
         alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.resetTitle, style: .destructive) { _ in
-            self.resetOnboarding(onboardingID, controller: controller, completionHandler: completionHandler)
+            self.resetOnboarding(context.onboardingID, controller: controller, completionHandler: completionHandler)
         })
 
         DispatchQueue.main.async {
@@ -582,7 +643,60 @@ In the given scenario any pending changes done by a user should be uploaded befo
     }
     ```
 
-5. Add a new function `switchToDuplicateUserWith` to set `transientUser`.
+5. Add a new function `resetPasscodeFailed`
+
+    ```swift
+    private func resetPasscodeFailed(with error: Error, completionHandler: @escaping (OnboardingErrorDisposition) -> Void) {
+        switch error {
+        case WelcomeScreenError.demoModeRequested:
+            completionHandler(.stop(error))
+            return
+        case ApplicationVersioningError.inactive:
+            showAlertWith(error: error)
+        default:
+            showAlertWith(error: error)
+        }
+
+        func showAlertWith(error: Error) {
+            let alertController = UIAlertController(
+                title: LocalizedStrings.Onboarding.failedToLogonTitle,
+                message: error.localizedDescription,
+                preferredStyle: .alert
+            )
+            switch error {
+            case UserManagerError.userMismatch(with: let id): // not for onboard or restore, for reset passcode
+                if let idNotNil = id {
+                    alertController.addAction(UIAlertAction(title: "Restore", style: .default) { _ in
+                        self.switchToDuplicateUserWith(onboardingID: idNotNil, completionHandler: completionHandler)
+                    })
+                } else {
+                    alertController.addAction(UIAlertAction(title: "Onboard", style: .default) { _ in
+                        self.switchToDuplicateUserWith(onboardingID: nil, completionHandler: completionHandler)
+                    })
+                }
+            case ApplicationVersioningError.inactive:
+                alertController.title = LocalizedStrings.Onboarding.failedToLogonTitle
+                alertController.message = error.localizedDescription
+                alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.retryTitle, style: .default) { _ in
+                    completionHandler(.retry)
+                })
+            default:
+                alertController.addAction(UIAlertAction(title: LocalizedStrings.Onboarding.retryTitle, style: .default) { _ in
+                    completionHandler(.retry)
+                })
+            }
+
+            DispatchQueue.main.async {
+                guard let topViewController = ModalUIViewControllerPresenter.topPresentedViewController() else {
+                    fatalError("Invalid UI state")
+                }
+                topViewController.present(alertController, animated: true)
+            }
+        }
+    }
+    ```
+
+6. Add a new function `switchToDuplicateUserWith`.
 
     ```swift
     private func switchToDuplicateUserWith(onboardingID: String?, completionHandler: @escaping (OnboardingErrorDisposition) -> Void) {
@@ -600,7 +714,7 @@ In the given scenario any pending changes done by a user should be uploaded befo
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 11: ](Build and run the application)]
+[ACCORDION-BEGIN [Step 10: ](Build and run the application)]
 
 1. In the menu bar, click Product &rarr; **Build**.
 
@@ -615,7 +729,7 @@ In the given scenario any pending changes done by a user should be uploaded befo
 [DONE]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 12: ](Onboard multiple users)]
+[ACCORDION-BEGIN [Step 11: ](Onboard multiple users)]
 
 1. Click **Start**.
 
@@ -642,7 +756,6 @@ In the given scenario any pending changes done by a user should be uploaded befo
     ![iOS App Choose Passcode](img_12_6.png)
 
     > Biometric authentication is not supported. The biometric screen will not be shown in the onboarding or unlock processes.
-
     > No passcode policy is not supported. A default passcode policy will be used if the server has disabled it.
 
 7. Enter the *passcode* again, and click **Done**.
@@ -684,7 +797,7 @@ In the given scenario any pending changes done by a user should be uploaded befo
 [VALIDATE_12]
 [ACCORDION-END]
 
-[ACCORDION-BEGIN [Step 13: ](Try offline scenarios)]
+[ACCORDION-BEGIN [Step 12: ](Try offline scenarios)]
 
 1. Sign into User A's account.
 
@@ -714,6 +827,5 @@ Congratulations on completing the tutorial!
 
 [DONE]
 [ACCORDION-END]
-
 
 ---
