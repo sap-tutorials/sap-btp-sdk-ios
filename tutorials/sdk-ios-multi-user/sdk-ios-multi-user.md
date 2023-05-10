@@ -19,7 +19,7 @@ author_profile: https://github.com/sandeep-tds
 
 ### You will learn
 
-- How to create an offline enabled native iOS application that supports multiple users on the same device
+- How to create an offline enabled iOS application that supports multiple users on the same device
 
 ---
 
