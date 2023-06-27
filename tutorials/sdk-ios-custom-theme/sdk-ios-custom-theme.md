@@ -31,11 +31,11 @@ You have built a native iOS application for the ground staff service technicians
 
 Using the multi-tenancy capabilities of BTP and SAP Mobile Services, you are providing the software to two airline companies.
 
-The airline teams are happy with your software, but they want the application to use the brand colours of their respective orgnisations.
+The airline teams are happy with your software, but they want the application to use the brand colours of their respective organizations.
 
 You anticipate selling the software to more airlines in the future. Therefore, you don't want to maintain multiple code-lines with custom theme for each customer.
 
-*In this tutorial, you will learn how to apply custom theme to your application without needing to re-deoply your native application. Click [here](https://help.sap.com/doc/f53c64b93e5140918d676b927a3cd65b/Cloud/en-US/docs-en/guides/features/application-themes/ios/theming.html) to learn more about themeing support on SAP BTP SDK iOS.*
+*In this tutorial, you will learn how to apply custom theme to your application without needing to re-deploy your native application. Click [here](https://help.sap.com/doc/f53c64b93e5140918d676b927a3cd65b/Cloud/en-US/docs-en/guides/features/application-themes/ios/theming.html) to learn more about custom theme support on SAP BTP SDK iOS.*
 
 [DONE]
 [ACCORDION-END]
@@ -46,12 +46,12 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
     | Name  | Download Link |
     |---|---|
-    | Air Line 1 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EdknqYa1vZtKi1yzW5W6do4BnlK0SAIC6pntAHSbqe1_UQ?e=aC7aoO) |
-    | Air Line 1 Dark Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EbW2CwO5A5tBpEqoJCF8IBwBc-qBkAAFTVQCI7HRxiaPjw?e=dpxtjr) |
-    | Air Line 2 Light Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWcws1WQbghIrcLnD1N-lUMBvWeMNHozB9Il8yXplQFPXw?e=2pNWlC) |
-    | Air Line 2 Dark Theme | [Download](https://sap-my.sharepoint.com/:u:/p/s_tetali_dattatreya_sitarama/EWV_2hu7Ud1NhUdYBoXXX3oBFKOH9MtD47PuP-H-sEFwDw?e=teQPHG) |
+    | Air Line 1 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_light.zip) |
+    | Air Line 1 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_dark.zip) |
+    | Air Line 2 Light Theme | [Download]((https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_light.zip)) |
+    | Air Line 2 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_dark.zip) |
 
-> You can create custom themes using the UI Theme designer. Click [here](cp-portal-freestyle-site-brand-site) to learn how to create custom themes using the UI Theme Designer on SAP Cloud Portal service.
+> You can create custom themes using the UI Theme designer. Click [here](https://developers.sap.com/tutorials/abap-environment-custom-theme.html) to learn how to create custom themes using the UI Theme Designer on SAP Cloud Portal service.
 
 [DONE]
 [ACCORDION-END]
@@ -285,6 +285,7 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 ![Themes On Multiple Screens](gif-11.gif)
 
 [VALIDATE_11]
-[ACCORDION-END]
 
 Congratulations on successfully completing the tutorial. You can now apply custom themes to native applications on the fly using SAP BTP SDK for iOS.
+
+[ACCORDION-END]

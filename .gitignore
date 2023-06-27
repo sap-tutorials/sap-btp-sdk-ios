@@ -20,7 +20,6 @@ analyze/reports/report_*.csv
 *.dmg
 *.gz
 *.jar
-*.zip
 
 # Logs and databases #
 ######################
