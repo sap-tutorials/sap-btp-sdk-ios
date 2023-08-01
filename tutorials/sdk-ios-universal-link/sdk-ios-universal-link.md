@@ -45,7 +45,7 @@ As you primarily use the mobile application, you want to click on the link to op
 
 3. Select **Associated Domains** to add the capability to the project.
 
-   ![Xcode Project Bar](img-2-3.png)
+    ![Xcode Project Bar](img-2-3.png)
 
     > Xcode will now connect to the specified Apple Developer profile and register or update the App ID to use the Associated Domains capability.
 
@@ -60,7 +60,7 @@ As you primarily use the mobile application, you want to click on the link to op
 
 3. Click on your app (For example `com.native.links`).
 
-   ![App List on Mobile Services](img-3-3.png)
+    ![App List on Mobile Services](img-3-3.png)
 
 4. Click **Application Links** tab.
 
@@ -102,7 +102,7 @@ As you primarily use the mobile application, you want to click on the link to op
 
 [ACCORDION-BEGIN [Step 5: ](Check the AASA file)]
 
-1. Go to you **SAP Mobile Services** Admin UI.
+1. Go to your **SAP Mobile Services** Admin UI.
 
 2. Click on your app (For example `com.native.links`).
 
@@ -114,7 +114,7 @@ As you primarily use the mobile application, you want to click on the link to op
 
 6. Paste the **Server** URL and add the suffix `/`.
 
-   >  The URL should look like `https://<YourUser-CFSpace-App>-com-example-tutorialapp.cfapps.eu10.hana.ondemand.com/.well-known/apple-app-site-association`
+    >  The URL should look like `https://<YourUser-CFSpace-App>-com-example-tutorialapp.cfapps.eu10.hana.ondemand.com/.well-known/apple-app-site-association`
 
 7. Go the above constructed URL.
 
@@ -130,7 +130,7 @@ As you primarily use the mobile application, you want to click on the link to op
 
 1. Open `AppDelegate.swift` on Xcode.
 
-2. Add the following function to `AppDelegate` class:
+2. Add the following function to the `AppDelegate` class:
 
     ```swift
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
@@ -169,14 +169,14 @@ As you primarily use the mobile application, you want to click on the link to op
 
 4. Complete the onboarding steps.
 
-   > Please refer to the pre-requisite for a step by step guide for the onboarding flow.
+    > Please refer to the pre-requisite for a step by step guide for the onboarding flow.
 
 [DONE]
 [ACCORDION-END]
 
 [ACCORDION-BEGIN [Step 8: ](Try the universal link)]
 
-1. Go to you **SAP Mobile Services** Admin UI.
+1. Go to your **SAP Mobile Services** Admin UI.
 
 2. Click on your app (For example `com.native.links`).
 
@@ -184,24 +184,24 @@ As you primarily use the mobile application, you want to click on the link to op
 
 4. Copy the URL under the *Apple Launch App Code with Universal Link* section.
 
-   ![App Launch URL](img-8-4.png)
+    ![App Launch URL](img-8-4.png)
 
 5. Open the **Reminders** App provided by iOS on your Simulator/Device.
 
-   > If the app is running on a real device, choose any option that hyperlinks the URL text, for example, Mail, Notes, Reminders, etc.
+    > If the app is running on a real device, choose any option that hyperlinks the URL text, for example, Mail, Notes, Reminders, etc.
 
 6. Add the App Launch URL copied in the earlier step.
 
-   > To ensure the URL is added as a hyperlink, please add the text in the main section of the reminder.
+    > To ensure the URL is added as a hyperlink, please add the text in the main section of the reminder.
 
 7. Click on the link.
 
-   ![Main URL Sample](img-8-7.gif)
+    ![Main URL Sample](img-8-7.gif)
 
 8. Add two more links to the Reminders app to test the deep-linking.
 
-   - `.../com.native.links/config/product`
-   - `.../com.native.links/config/vendors`
+    - `.../com.native.links/config/product`
+    - `.../com.native.links/config/vendors`
 
     ![Deeplink URL Sample](img-8-8.gif)
 
