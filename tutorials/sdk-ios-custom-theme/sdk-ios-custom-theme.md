@@ -46,9 +46,9 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
     | Name  | Download Link |
     |---|---|
-    | Air Line 1 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_light.zip) |
-    | Air Line 1 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_dark.zip) |
-    | Air Line 2 Light Theme | [Download]((https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_light.zip)) |
+    | Air Line 1 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_light.zip) |
+    | Air Line 1 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_dark.zip) |
+    | Air Line 2 Light Theme | [Download]([airline_theme_2_light.zip](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_light.zip)) |
     | Air Line 2 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_dark.zip) |
 
 > You can create custom themes using the UI Theme designer. Click [here](https://developers.sap.com/tutorials/abap-environment-custom-theme.html) to learn how to create custom themes using the UI Theme Designer on SAP Cloud Portal service.
