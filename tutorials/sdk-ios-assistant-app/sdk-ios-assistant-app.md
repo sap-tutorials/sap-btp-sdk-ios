@@ -13,9 +13,7 @@ author_profile: https://github.com/sandeep-tds
 
 - [Set Up SAP BTP SDK for iOS](sdk-ios-setup)
 
-## Details
-
-### You will learn  
+## You will learn  
 
 - How to create an app configuration on SAP Mobile Services Admin cockpit.
 - Capabilities of Sample OData service provided by SAP Mobile Services.
@@ -243,7 +241,7 @@ The record gets updated and a confirmation toast message appears.
 
 > After sync, you can verify the update by going to your SAP Mobile Services Cockpit.
 
+Congratulations on successfully building an iOS application using the SAP BTP SDK Assistant for iOS that seamlessly connects to SAP Mobile Services.
+
 [VALIDATE_6]
 [ACCORDION-END]
-
-Congratulations on successfully building an iOS application using the SAP BTP SDK Assistant for iOS that seamlessly connects to SAP Mobile Services.
