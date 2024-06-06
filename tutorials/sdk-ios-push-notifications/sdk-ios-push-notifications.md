@@ -15,9 +15,7 @@ author_profile: https://github.com/sandeep-tds
 - [Created Your First App using SAP BTP SDK Assistant for iOS](sdk-ios-assistant-app)
 - [Apple Developer Account](https://developer.apple.com/programs/enroll/): *A paid Apple developer account is required*
 
-## Details
-
-### You will learn  
+## You will learn  
 
 - How to configure push notifications on SAP Mobile Services
 - How to send a push notification from SAP Mobile Services to you native iOS application
@@ -320,7 +318,7 @@ In order to use the **Apple Push Notification service**, we need to create a **C
 
     ![Advanced Push Notifications](gif-10.gif)
 
+Congratulations on successfully completing the tutorial. You can now send push notifications to your native applications built using SAP BTP SDK for iOS.
+
 [DONE]
 [ACCORDION-END]
-
-Congratulations on successfully completing the tutorial. You can now send push notifications to your native applications built using SAP BTP SDK for iOS.

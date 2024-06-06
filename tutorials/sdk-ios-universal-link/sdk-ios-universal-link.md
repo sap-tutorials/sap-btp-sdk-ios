@@ -205,9 +205,9 @@ As you primarily use the mobile application, you want to click on the link to op
 
     ![Deeplink URL Sample](img-8-8.gif)
 
+Congratulations on successfully completing the tutorial. You can now configure universal links for your native applications built using SAP BTP SDK for iOS.
+
 [DONE]
 [ACCORDION-END]
-
-Congratulations on successfully completing the tutorial. You can now configure universal links for your native applications built using SAP BTP SDK for iOS.
 
 ---

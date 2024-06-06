@@ -15,9 +15,7 @@ author_profile: https://github.com/sandeep-tds
 - [Set Up SAP BTP SDK for iOS](sdk-ios-setup)
 - [Created Your First App using SAP BTP SDK Assistant for iOS](sdk-ios-assistant-app)
 
-## Details
-
-### You will learn
+## You will learn
 
 - How to create an offline enabled iOS application that supports multiple users on the same device
 

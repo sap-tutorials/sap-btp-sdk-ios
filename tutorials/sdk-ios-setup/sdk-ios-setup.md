@@ -17,9 +17,7 @@ author_profile: https://github.com/sandeep-tds
 - [Account on SAP Mobile Services](fiori-ios-hcpms-setup)
 - [Location](https://github.com/sap-tutorials/sap-btp-sdk-ios/issues) to raise issues found in the tutorial.
 
-## Details
-
-### You will learn  
+## You will learn  
 
 - What is SAP BTP SDK for iOS
 - How to download SAP BTP SDK for iOS
