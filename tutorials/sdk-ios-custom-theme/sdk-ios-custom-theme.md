@@ -44,10 +44,10 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
     | Name  | Download Link |
     |---|---|
-    | Air Line 1 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_light.zip) |
-    | Air Line 1 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_dark.zip) |
-    | Air Line 2 Light Theme | [Download]([airline_theme_2_light.zip](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_light.zip)) |
-    | Air Line 2 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios-Contribution/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_dark.zip) |
+    | Air Line 1 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_light.zip) |
+    | Air Line 1 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_1_dark.zip) |
+    | Air Line 2 Light Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_light.zip) |
+    | Air Line 2 Dark Theme | [Download](https://github.com/sap-tutorials/sap-btp-sdk-ios/raw/main/tutorials/sdk-ios-custom-theme/airline_theme_2_dark.zip) |
 
 > You can create custom themes using the UI Theme designer. Click [here](https://developers.sap.com/tutorials/abap-environment-custom-theme.html) to learn how to create custom themes using the UI Theme Designer on SAP Cloud Portal service.
 
@@ -103,26 +103,40 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
 2. Click **New** located at the top right corner.
 
-3. Use the following table to fill the details requested in the *New Application* Wizard.
+3. Select **Mobile Development Kit (MDK)** in the *New Application* Wizard
+    
+    ![alt text](img-4-3.png)
+
+4. Click **Next**.
+
+5. Use the following table to fill the details requested in the *Basic Info* Tab.
 
     | Key | Value |
     |---|---|
+    |License Type|*No Change*|
     |ID|**`sdk.custom.theme.app`**|
     |Name|**`Custom Theme App`**|
     |Description|**`Custom Theme App`**|
     |Vendor|*No Change*|
-    |License Type|*No Change*|
     |Domain of Application Route|*No Change*|
 
-4. Click **Next**.
+6. Click **Next**.
 
-5. Click **Next** on the *XSUAA Settings* step of the Wizard without making any changes.
+7. Click **Next** on the *XSUAA Settings* step of the Wizard without making any changes.
 
-6. Select **Native Application** in the *Assign Features for* drop down menu.
+8. Click **Next** on the **Role Settings** step without making any changes.
+    
+    ![alt text](img-4-8.png)
 
-7. Enable **Mobile Sample OData ESPM** by selecting the check box in the features table.
+9. Click **Next**.
 
-8. Click **Finish**.
+10. Select **Native Application** in the *Assign Features for* drop down menu.
+
+11. Enable **Mobile Sample OData ESPM** by selecting the check box in the features table.
+
+12. Click **Finish**.
+
+> If prompted, Click OK on the role permissions warning.
 
 ![Server Side App Creation](gif-4.gif)
 
@@ -131,9 +145,13 @@ You anticipate selling the software to more airlines in the future. Therefore, y
 
 [ACCORDION-BEGIN [Step 5: ](Enable a custom theme for your app on SAP Mobile Services)]
 
-1. Click Assigned Features &rarr; **Mobile Settings Exchange**.
+1. Click **Mobile Applications &rarr; Native/MDK** in the sidebar.
 
-2. Enable **Enable Custom Theme** check-box under the Appearance section of the Client Configuration tab.
+2. Click **sdk.custom.theme.app**.
+
+3. Click Assigned Features &rarr; **Mobile Settings Exchange**.
+
+4. Enable **Enable Custom Theme** check-box under the Appearance section of the Client Configuration tab.
 
     ![Enable Custom Theme Table](img-5-2.png)
 
