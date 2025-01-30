@@ -128,7 +128,7 @@ author_profile: https://github.com/sandeep-tds
 
 2. Search for `onboardingSteps` to view the function responsible for providing onboarding steps (e.g. Log In, User Consent, Passcode etc.) required by most enterprise mobile applications.
 
-3. Open `my-first-app` &rarr; `my-first-app` &rarr; `ViewControllers` &rarr; **`Product`**.
+3. Open `my-first-app` &rarr; `my-first-app` &rarr; `ViewControllers` &rarr; `ESPMContainer` &rarr; **`Product`**.
 
 4. You will have a storyboard file and two controller files configured to show a list detail view in the app. The assistant automatically creates these files for all the entities present in the Mobile Sample OData ESPM configured.
 
