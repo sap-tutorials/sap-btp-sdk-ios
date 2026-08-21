@@ -67,53 +67,53 @@ To implement the new flow you can attach our current app flow in storyboard to a
 
     To ensure that you will see the standard app flow while running on iOS and displaying the Split View when running on Mac Catalyst you can use environmental conditions to distinct different initialization code.
 
-    ```Swift
-    #if targetEnvironment(macCatalyst)
-    #else
+   ```Swift
+   #if targetEnvironment(macCatalyst)
+   #else
 
-    ```
+   ```
 
 6. Open the `ApplicationUIManager.swift` file and locate the `showApplicationScreen(completionHandler:)` method. Right now you can see that you're initializing the Navigation Controller as our initial screen but you have to change that to be adaptable to Mac Catalyst. Change the implement code to the following and read the inline comments carefully:
 
-    ```Swift[12-25]
-    func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
-        // Check if an application screen has already been presented
-        guard isSplashPresented else {
-            completionHandler(nil)
-            return
-        }
+   ```Swift[12-25]
+   func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
+       // Check if an application screen has already been presented
+       guard isSplashPresented else {
+           completionHandler(nil)
+           return
+       }
 
-        // set rootViewController only once ie after onboarding when app screen is about to be shown
-        // for restore, remove covering views previously added
-        let appViewController: UIViewController
-        if isOnboarding {
+       // set rootViewController only once ie after onboarding when app screen is about to be shown
+       // for restore, remove covering views previously added
+       let appViewController: UIViewController
+       if isOnboarding {
 #if targetEnvironment(macCatalyst)
-            let splitViewController = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UISplitViewController
+           let splitViewController = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UISplitViewController
 
-            splitViewController.modalPresentationStyle = .currentContext
-            splitViewController.preferredDisplayMode = .allVisible
-            appViewController = splitViewController
+           splitViewController.modalPresentationStyle = .currentContext
+           splitViewController.preferredDisplayMode = .allVisible
+           appViewController = splitViewController
 
-            // If running on iOS show the OverviewTableViewController
+           // If running on iOS show the OverviewTableViewController
 #else
-            let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "OverviewTableViewController") as! OverviewTableViewController
-            appViewController = overviewTVC
+           let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "OverviewTableViewController") as! OverviewTableViewController
+           appViewController = overviewTVC
 #endif
 
-            isOnboarding = false
-            coveringViews.removeAll()
+           isOnboarding = false
+           coveringViews.removeAll()
 
-            // maintain this boolean since no splash screen is present now
-            isSplashPresented = false
-            window.rootViewController = appViewController
-        } else {
-            removeCoveringViews()
-        }
+           // maintain this boolean since no splash screen is present now
+           isSplashPresented = false
+           window.rootViewController = appViewController
+       } else {
+           removeCoveringViews()
+       }
 
-        completionHandler(nil)
-    }
+       completionHandler(nil)
+   }
 
-    ```
+   ```
 
 7. Run the app on the **My Mac** scheme and you should see you app being in Split View now and you can see that beautiful empty sidebar. Also if you have noticed the system automatically knows that your app wants to receive Push Notifications and the Mac Catalyst makes sure that MacOS displays it accordingly.
 
@@ -142,82 +142,82 @@ You're going to display a list with three cells containing the navigation possib
 
 4. First import the `SAPFiori` and `SAPCommon` frameworks, leave the `UIKit` statement:
 
-    ```Swift
-    import SAPFiori
-    import SAPCommon
+   ```Swift
+   import SAPFiori
+   import SAPCommon
 
-    ```
+   ```
 
 5. Next retrieve a new logger instance like you did before:
 
-    ```Swift
-    private let logger = Logger.shared(named: "SidebarTableViewController")
+   ```Swift
+   private let logger = Logger.shared(named: "SidebarTableViewController")
 
-    ```
+   ```
 
 6. In the `viewDidLoad()` method register an `FUIObjectTableViewCell` to be used by the Table View:
 
-    ```Swift[4]
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   ```Swift[4]
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-    }
+       tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+   }
 
-    ```
+   ```
 
     This should all be familiar to you, you see building an app is really easy.
 
 7. Now let's implement the table view's data source first add the `numberOfSections(in:)` method:
 
-    ```Swift
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
+   ```Swift
+   override func numberOfSections(in tableView: UITableView) -> Int {
+       return 1
+   }
 
-    ```
+   ```
 
     You only need one section for this view so just return 1.
 
 8. Directly below implement the `tableView(_:numberOfRowsInSection:)` method:
 
-    ```Swift
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
-    }
+   ```Swift
+   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+       return 3
+   }
 
-    ```
+   ```
 
     You're going to display three cells for the Overview, the customer list and the product list.
 
 9. Let's not forget about the `tableView(_:cellForRowAt:)` method:
 
-    ```Swift
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
+   ```Swift
+   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+       let cell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
 
-        // Define a UIImage SymbolConfiguration with the scaling factor of small. This allows the system to scale the SF Symbol accordingly.
-        let smallConfiguration = UIImage.SymbolConfiguration(scale: .small)
+       // Define a UIImage SymbolConfiguration with the scaling factor of small. This allows the system to scale the SF Symbol accordingly.
+       let smallConfiguration = UIImage.SymbolConfiguration(scale: .small)
 
-        // Switch Statement to go over the different rows. Set the headline text and the detail image using SF Symbols.
-        switch indexPath.row {
-        case 0:
-            cell.headlineText = NSLocalizedString("Overview", comment: "")
-            cell.detailImage = UIImage(systemName: "globe", withConfiguration: smallConfiguration)
-        case 1:
-            cell.headlineText = NSLocalizedString("Products", comment: "")
-            cell.detailImage = UIImage(systemName: "tv", withConfiguration: smallConfiguration)
-        case 2:
-            cell.headlineText = NSLocalizedString("Customers", comment: "")
-            cell.detailImage = UIImage(systemName: "person", withConfiguration: smallConfiguration)
-        default:
-            return UITableViewCell()
-        }
+       // Switch Statement to go over the different rows. Set the headline text and the detail image using SF Symbols.
+       switch indexPath.row {
+       case 0:
+           cell.headlineText = NSLocalizedString("Overview", comment: "")
+           cell.detailImage = UIImage(systemName: "globe", withConfiguration: smallConfiguration)
+       case 1:
+           cell.headlineText = NSLocalizedString("Products", comment: "")
+           cell.detailImage = UIImage(systemName: "tv", withConfiguration: smallConfiguration)
+       case 2:
+           cell.headlineText = NSLocalizedString("Customers", comment: "")
+           cell.detailImage = UIImage(systemName: "person", withConfiguration: smallConfiguration)
+       default:
+           return UITableViewCell()
+       }
 
-        return cell
-    }
+       return cell
+   }
 
-    ```
+   ```
 
 10. If you run the app now you should see the cell being displayed in the sidebar.
 
@@ -232,44 +232,44 @@ In order to let the user have interactions with the list items you have to write
 
 1. In the `SidebarTableViewController` add the following method below the data source methods. Read the inline comments carefully:
 
-    ```Swift
-    // CollectionType selection helper
-    private func viewSelected(at indexPath: IndexPath) {
-        // Load the EntityType specific ViewController from the specific storyboard"
-        var viewController: UIViewController!
+   ```Swift
+   // CollectionType selection helper
+   private func viewSelected(at indexPath: IndexPath) {
+       // Load the EntityType specific ViewController from the specific storyboard"
+       var viewController: UIViewController!
 
-        let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+       let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
 
-        // Decide which View Controller to instantiate.
-        switch indexPath.row {
-        case 0:
-            viewController = mainStoryboard.instantiateViewController(identifier: "OverviewTableViewController")
-        case 1:
-            viewController = mainStoryboard.instantiateViewController(identifier: "ProductsTableViewController")
-        case 2:
-            viewController = mainStoryboard.instantiateViewController(identifier: "CustomersTableViewController")
-        default:
-            viewController = UIViewController()
-        }
+       // Decide which View Controller to instantiate.
+       switch indexPath.row {
+       case 0:
+           viewController = mainStoryboard.instantiateViewController(identifier: "OverviewTableViewController")
+       case 1:
+           viewController = mainStoryboard.instantiateViewController(identifier: "ProductsTableViewController")
+       case 2:
+           viewController = mainStoryboard.instantiateViewController(identifier: "CustomersTableViewController")
+       default:
+           viewController = UIViewController()
+       }
 
-        // Load the NavigationController and present with the EntityType specific ViewController
-        let rightNavigationController = mainStoryboard.instantiateViewController(withIdentifier: "SubNavigationController") as! UINavigationController
-        rightNavigationController.viewControllers = [viewController]
+       // Load the NavigationController and present with the EntityType specific ViewController
+       let rightNavigationController = mainStoryboard.instantiateViewController(withIdentifier: "SubNavigationController") as! UINavigationController
+       rightNavigationController.viewControllers = [viewController]
 
-        // Display the Detail View Controller
-        splitViewController?.showDetailViewController(rightNavigationController, sender: nil)
-    }
+       // Display the Detail View Controller
+       splitViewController?.showDetailViewController(rightNavigationController, sender: nil)
+   }
 
-    ```
+   ```
 
 2. You have to make sure that the `viewSelected(at:)` method gets called as soon as the user clicks on a list item. Add the following table view delegate method directly below the data source methods:
 
-    ```Swift
-    override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        viewSelected(at: indexPath)
-    }
+   ```Swift
+   override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
+       viewSelected(at: indexPath)
+   }
 
-    ```
+   ```
 
     This will make sure that the correct index path gets passed into the `viewSelected(at:)` method.
 
@@ -291,10 +291,10 @@ In order to let the user have interactions with the list items you have to write
 
 6. The last step you want to do is change the navigation item's title from **`SidebarTableViewController`** to **Navigation**. Add the following line of code to the `viewDidLoad()` method:
 
-    ```Swift
-    navigationItem.title = NSLocalizedString("Navigation", comment: "")
+   ```Swift
+   navigationItem.title = NSLocalizedString("Navigation", comment: "")
 
-    ```
+   ```
 
 7. Compile and run the app on **My Mac** and try your hard work.
 
@@ -320,45 +320,45 @@ You can create an extension swift file containing an `AppDelegate` extension con
 
 2. Open the `AppDelegate+MenuBuilder.swift` file and change the import statement from `Foundation` to `UIKit`:
 
-    ```Swift
-    import UIKit
-    ```
+   ```Swift
+   import UIKit
+   ```
 
 3. The override `buildMenu(with:)` allows us to manipulate and create menu items for the menu bar. Implement the `buildMenu(with:)` method inside an extension and read the inline comments carefully:
 
-    ```Swift
-    extension AppDelegate {
-        // MARK: - Mac Catalyst Menu Bar
-        override func buildMenu(with builder: UIMenuBuilder) {
-            super.buildMenu(with: builder)
+   ```Swift
+   extension AppDelegate {
+       // MARK: - Mac Catalyst Menu Bar
+       override func buildMenu(with builder: UIMenuBuilder) {
+           super.buildMenu(with: builder)
 
-            // Remove the Format menu because this is not needed for this app.
-            builder.remove(menu: .format)
+           // Remove the Format menu because this is not needed for this app.
+           builder.remove(menu: .format)
 
-            // Create an menu item and give it a selector method from some class. In this case OverviewTableViewController.
-            let reloadMenuItem = UIKeyCommand(title: NSLocalizedString("Synchronize...", comment: ""),
-                                                 action: #selector(OverviewTableViewController.loadData),
-                                                 input: "r",
-                                                 modifierFlags: .command)
+           // Create an menu item and give it a selector method from some class. In this case OverviewTableViewController.
+           let reloadMenuItem = UIKeyCommand(title: NSLocalizedString("Synchronize...", comment: ""),
+                                                action: #selector(OverviewTableViewController.loadData),
+                                                input: "r",
+                                                modifierFlags: .command)
 
-            // Create a Menu and add it an identifier, also define that it should be shown in line. Give it the menu item as children. You could add far more items here if you wanted to.
-            let reloadDataMenu = UIMenu(title: "",
-                                        image: nil,
-                                        identifier: UIMenu.Identifier("com.sap.example.MySampleAppCatalyst.Synchronize"),
-                                        options: .displayInline,
-                                        children: [reloadMenuItem])
+           // Create a Menu and add it an identifier, also define that it should be shown in line. Give it the menu item as children. You could add far more items here if you wanted to.
+           let reloadDataMenu = UIMenu(title: "",
+                                       image: nil,
+                                       identifier: UIMenu.Identifier("com.sap.example.MySampleAppCatalyst.Synchronize"),
+                                       options: .displayInline,
+                                       children: [reloadMenuItem])
 
-            // Tell the UIMenuBuilder where to insert the menu.
-            builder.insertChild(reloadDataMenu, atEndOfMenu: .file)
-        }
-    }
-    ```
+           // Tell the UIMenuBuilder where to insert the menu.
+           builder.insertChild(reloadDataMenu, atEndOfMenu: .file)
+       }
+   }
+   ```
 
 4. Save the file and open the `OverviewTableViewController.swift` class and change the `loadData()` method declaration to internal and add the `@objc` attribute. The `@objc` allows to make method callable for the `Objective-C` runtime:
 
-    ```Swift
-    @objc func loadData() { ... }
-    ```
+   ```Swift
+   @objc func loadData() { ... }
+   ```
 
 5. Run the app on **My Mac** scheme.
 

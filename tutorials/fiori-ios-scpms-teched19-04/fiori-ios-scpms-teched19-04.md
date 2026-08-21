@@ -29,127 +29,127 @@ In the last tutorial, you implemented the Overview Table View Controller and the
 
 1. Open the `CustomerDetailTableViewController.swift` class and add the following import statements right below the `UIKit` import:
 
-    ```Swift
+   ```Swift
 
-    import SAPFiori
-    import SAPOData
-    import SAPOfflineOData
-    import SAPCommon
-    import SAPFoundation
-    import SAPFioriFlows
-    import ESPMContainerFmwk
-    import SharedFmwk
+   import SAPFiori
+   import SAPOData
+   import SAPOfflineOData
+   import SAPCommon
+   import SAPFoundation
+   import SAPFioriFlows
+   import ESPMContainerFmwk
+   import SharedFmwk
 
-    ```
+   ```
 
 2. Add the following properties right above the `var customerId: String!` line of code:
 
-    ```Swift
+   ```Swift
 
-    private let logger = Logger.shared(named: "CustomerDetailTableViewController")
+   private let logger = Logger.shared(named: "CustomerDetailTableViewController")
 
-    var loadingIndicator: FUILoadingIndicatorView?
+   var loadingIndicator: FUILoadingIndicatorView?
 
-    private let profileHeader = FUIProfileHeader()
+   private let profileHeader = FUIProfileHeader()
 
-    ```
+   ```
 
     The above code should look familiar to you from the Overview View Controller.
 
 3. Make the `CustomerDetailTableViewController.swift` class implement the `SAPFioriLoadingIndicator` protocol.
 
-    ```Swift
+   ```Swift
 
-    class CustomerDetailTableViewController: UITableViewController, SAPFioriLoadingIndicator { ... }
+   class CustomerDetailTableViewController: UITableViewController, SAPFioriLoadingIndicator { ... }
 
-    ```
+   ```
 
 4. Add the following lines of code as class properties to the `CustomerDetailTableViewController.swift` class to retrieve the data service:
 
-    ```Swift
-    // The available destinations from Mobile Services are hold in the FileConfigurationProvider. Retrieve it to find the correct data service
-    let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
+   ```Swift
+   // The available destinations from Mobile Services are hold in the FileConfigurationProvider. Retrieve it to find the correct data service
+   let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
 
-    // Retrieve the data service using the destinations dictionary and return it.
-    var dataService: ESPMContainer<OfflineODataProvider>? {
-        guard let odataController = OnboardingSessionManager.shared.onboardingSession?.odataControllers[ODataContainerType.eSPMContainer.description] as? ESPMContainerOfflineODataController, let dataService = odataController.dataService else {
-            AlertHelper.displayAlert(with: "OData service is not reachable, please onboard again.", error: nil, viewController: self)
-            return nil
-        }
-        return dataService
-    }
+   // Retrieve the data service using the destinations dictionary and return it.
+   var dataService: ESPMContainer<OfflineODataProvider>? {
+       guard let odataController = OnboardingSessionManager.shared.onboardingSession?.odataControllers[ODataContainerType.eSPMContainer.description] as? ESPMContainerOfflineODataController, let dataService = odataController.dataService else {
+           AlertHelper.displayAlert(with: "OData service is not reachable, please onboard again.", error: nil, viewController: self)
+           return nil
+       }
+       return dataService
+   }
 
-    ```
+   ```
 
     All that code is pretty much the same as in the Overview View Controller. Instead of fetching all customers you want only the data of the customer matching the provided ID.
 
 5. Add the following lines of code right below the `viewDidLoad(:)` method and read the inline comments for more details about the implemented code:
 
-    ```Swift
+   ```Swift
 
-    // MARK: - Data loading methods
+   // MARK: - Data loading methods
 
-    private func updateTable() {
-        // Show the loading indicator
-        self.showFioriLoadingIndicator()
+   private func updateTable() {
+       // Show the loading indicator
+       self.showFioriLoadingIndicator()
 
-        // Wait for the completion handler to get executed and hide the loading indicator
-        self.loadData {
-            self.hideFioriLoadingIndicator()
+       // Wait for the completion handler to get executed and hide the loading indicator
+       self.loadData {
+           self.hideFioriLoadingIndicator()
 
-            // You will implement that method in the next steps, for now please just call it here.
-            self.setupProfileHeader()
+           // You will implement that method in the next steps, for now please just call it here.
+           self.setupProfileHeader()
 
-            // Reload the Table View to show the newly fetched data
-            self.tableView.reloadData()
-        }
-    }
+           // Reload the Table View to show the newly fetched data
+           self.tableView.reloadData()
+       }
+   }
 
-    // Load the Customer for the set Customer ID
-    private func loadData(completionHandler: @escaping () -> Void) {
+   // Load the Customer for the set Customer ID
+   private func loadData(completionHandler: @escaping () -> Void) {
 
-        // Expand the OData call to also retrieve the Customers Sales Orders as you're going to display those in the Chart.
-        let query = DataQuery().expand(Customer.salesOrders)
+       // Expand the OData call to also retrieve the Customers Sales Orders as you're going to display those in the Chart.
+       let query = DataQuery().expand(Customer.salesOrders)
 
-        // Fetch the customer with a certain ID
-        dataService?.fetchCustomerWithKey(customerID: customerId, query: query) { [weak self] result, error in
+       // Fetch the customer with a certain ID
+       dataService?.fetchCustomerWithKey(customerID: customerId, query: query) { [weak self] result, error in
 
-            // If there is an error let the user know and log it to the console.
-            if let error = error {
-                AlertHelper.displayAlert(with: "Couldn't load sales orders for customer.", error: error, viewController: self!)
-                self?.logger.error("Couldn't load sales orders for customer.", error: error)
-                return
-            }
+           // If there is an error let the user know and log it to the console.
+           if let error = error {
+               AlertHelper.displayAlert(with: "Couldn't load sales orders for customer.", error: error, viewController: self!)
+               self?.logger.error("Couldn't load sales orders for customer.", error: error)
+               return
+           }
 
-            // Set the result to a customer property
-            self?.customer = result!
+           // Set the result to a customer property
+           self?.customer = result!
 
-            // Set the retrieved Sales Orders to it's property
-            self?.salesOrderHeaders = result!.salesOrders
+           // Set the retrieved Sales Orders to it's property
+           self?.salesOrderHeaders = result!.salesOrders
 
-            // You will need this property later for the Charts.
-            self?.isDataLoaded = true
+           // You will need this property later for the Charts.
+           self?.isDataLoaded = true
 
-            // Execute the Completion Handler
-            completionHandler()
-        }
-    }
+           // Execute the Completion Handler
+           completionHandler()
+       }
+   }
 
-    ```
+   ```
 
     Don't worry, you will fix the compile time errors in a second.
 
 6. Call the `updateTable()` in the `viewDidLoad(:)` method:
 
-    ```Swift
+   ```Swift
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        updateTable()
-    }
+       updateTable()
+   }
 
-    ```
+   ```
 
     To fix the rest of the compile-time errors, you have to implement the additional properties for storing the fetched customer, the flag `isDataLoaded`, as well as a computed property for the Sales Order Headers.
 
@@ -157,41 +157,41 @@ In the last tutorial, you implemented the Overview Table View Controller and the
 
     Add the following lines of code right below the `var customerId: String` property, read the inline comments for more explanation:
 
-    ```Swift
+   ```Swift
 
-    // The Sales Order Headers property is an Array.
-    private var salesOrderHeaders = [SalesOrderHeader]() {
-        // When that property is set through the loadData() make the needed calculations
-        didSet {
+   // The Sales Order Headers property is an Array.
+   private var salesOrderHeaders = [SalesOrderHeader]() {
+       // When that property is set through the loadData() make the needed calculations
+       didSet {
 
-            // With help of the map call on the array you can access the net amount property of the Sales Order Header of each element in the array, make the calculation and safe it in the Series Data property needed for the Chart.
-            seriesData = [salesOrderHeaders.map {
-                guard let net = $0.netAmount?.doubleValue() else {
-                    return 0.0
-                }
-                return net
-                }]
-        }
-    }
+           // With help of the map call on the array you can access the net amount property of the Sales Order Header of each element in the array, make the calculation and safe it in the Series Data property needed for the Chart.
+           seriesData = [salesOrderHeaders.map {
+               guard let net = $0.netAmount?.doubleValue() else {
+                   return 0.0
+               }
+               return net
+               }]
+       }
+   }
 
-    private var customer = Customer()
-    private var isDataLoaded = false
+   private var customer = Customer()
+   private var isDataLoaded = false
 
-    ```
+   ```
 
 8. The `salesOrderHeaders` property will have a compile-time error for now because it tries to set the calculated values to the `seriesData` property which doesn't exist yet.
     To fix that implement the following properties right below the `isDataLoaded` property:
 
-    ```Swift
+   ```Swift
 
-    private var seriesData: [[Double]]?
+   private var seriesData: [[Double]]?
 
-    private var chartData = (
-        series: ["2018"],
-        categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    )
+   private var chartData = (
+       series: ["2018"],
+       categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+   )
 
-    ```
+   ```
 
     You're done for now, you will go into detail about how the Chart data is structured at a later point.
 
@@ -204,54 +204,54 @@ In order to display the Charts, you're going to use the `FUIChartTitleTableViewC
 
 1. Add the following lines of code to the `viewDidLoad(:)` right above the `updateTable()` method call:
 
-    ```Swift[2-12]
+   ```Swift[2-12]
 
-  override func viewDidLoad() {
-      // The Object Cell is used for the case if there are no Customer Sales Headers available for the chosen customer
-      tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+ override func viewDidLoad() {
+     // The Object Cell is used for the case if there are no Customer Sales Headers available for the chosen customer
+     tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
 
-      // Used to display the title information for the Chart
-      tableView.register(FUIChartTitleTableViewCell.self, forCellReuseIdentifier: FUIChartTitleTableViewCell.reuseIdentifier)
+     // Used to display the title information for the Chart
+     tableView.register(FUIChartTitleTableViewCell.self, forCellReuseIdentifier: FUIChartTitleTableViewCell.reuseIdentifier)
 
-      // Used to display the Chart itself
-      tableView.register(FUIChartPlotTableViewCell.self, forCellReuseIdentifier: FUIChartPlotTableViewCell.reuseIdentifier)
+     // Used to display the Chart itself
+     tableView.register(FUIChartPlotTableViewCell.self, forCellReuseIdentifier: FUIChartPlotTableViewCell.reuseIdentifier)
 
-      // Used to display the Chart legend
-      tableView.register(FUIChartLegendTableViewCell.self, forCellReuseIdentifier: FUIChartLegendTableViewCell.reuseIdentifier)
+     // Used to display the Chart legend
+     tableView.register(FUIChartLegendTableViewCell.self, forCellReuseIdentifier: FUIChartLegendTableViewCell.reuseIdentifier)
 
-      updateTable()
-    }
+     updateTable()
+   }
 
-    ```
+   ```
 
 2. You need to set up the Table View in order for the cells to be displayed correctly.
     Add the following lines of code right above the cell registration code:
 
-    ```Swift[14-16]
+   ```Swift[14-16]
 
-    override func viewDidLoad() {
-          // The Object Cell is used for the case if there are no Customer Sales Headers available for the chosen customer
-          tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+   override func viewDidLoad() {
+         // The Object Cell is used for the case if there are no Customer Sales Headers available for the chosen customer
+         tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
 
-          // Used to display the title information for the Chart
-          tableView.register(FUIChartTitleTableViewCell.self, forCellReuseIdentifier: FUIChartTitleTableViewCell.reuseIdentifier)
+         // Used to display the title information for the Chart
+         tableView.register(FUIChartTitleTableViewCell.self, forCellReuseIdentifier: FUIChartTitleTableViewCell.reuseIdentifier)
 
-          // Used to display the Chart itself
-          tableView.register(FUIChartPlotTableViewCell.self, forCellReuseIdentifier: FUIChartPlotTableViewCell.reuseIdentifier)
+         // Used to display the Chart itself
+         tableView.register(FUIChartPlotTableViewCell.self, forCellReuseIdentifier: FUIChartPlotTableViewCell.reuseIdentifier)
 
-          // Used to display the Chart legend
-          tableView.register(FUIChartLegendTableViewCell.self, forCellReuseIdentifier: FUIChartLegendTableViewCell.reuseIdentifier)
+         // Used to display the Chart legend
+         tableView.register(FUIChartLegendTableViewCell.self, forCellReuseIdentifier: FUIChartLegendTableViewCell.reuseIdentifier)
 
-          tableView.estimatedRowHeight = 80
-          tableView.rowHeight = UITableView.automaticDimension
-          tableView.separatorStyle = .none
+         tableView.estimatedRowHeight = 80
+         tableView.rowHeight = UITableView.automaticDimension
+         tableView.separatorStyle = .none
 
-          updateTable()
-      }
+         updateTable()
+     }
 
-  }
+ }
 
-    ```
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -344,73 +344,73 @@ In the last step, you've implemented the Table View's Data Source. The `FUIChart
 
 1. Create an extension all the way down in this file, outside of the closing bracket of the class:
 
-    ```Swift
+   ```Swift
 
-    // MARK: - FUIChartViewDataSource
+   // MARK: - FUIChartViewDataSource
 
-    extension CustomerDetailTableViewController: FUIChartViewDataSource {
-      func chartView(_ chartView: FUIChartView, valueForSeries seriesIndex: Int, category categoryIndex: Int, dimension dimensionIndex: Int) -> Double? {
-          return nil
-      }
+   extension CustomerDetailTableViewController: FUIChartViewDataSource {
+     func chartView(_ chartView: FUIChartView, valueForSeries seriesIndex: Int, category categoryIndex: Int, dimension dimensionIndex: Int) -> Double? {
+         return nil
+     }
 
-      func chartView(_ chartView: FUIChartView, numberOfValuesInSeries seriesIndex: Int) -> Int {
-          return 0
-      }
+     func chartView(_ chartView: FUIChartView, numberOfValuesInSeries seriesIndex: Int) -> Int {
+         return 0
+     }
 
-      func numberOfSeries(in: FUIChartView) -> Int {
-          return 0
-      }
+     func numberOfSeries(in: FUIChartView) -> Int {
+         return 0
+     }
 
-    }
+   }
 
-    ```
+   ```
 
 2. Inside this extension, implement the following code and read the inline comments carefully:
 
-    ```Swift
+   ```Swift
 
-    // Return the number of series. Use the previously created seriesData property to do so. If the count of the seriesData is 0 return 0
-    func numberOfSeries(in: FUIChartView) -> Int {
-        return seriesData?.count ?? 0
-    }
+   // Return the number of series. Use the previously created seriesData property to do so. If the count of the seriesData is 0 return 0
+   func numberOfSeries(in: FUIChartView) -> Int {
+       return seriesData?.count ?? 0
+   }
 
-    // Return the number of values the Chart should display. Because this is a two dimensional array, access the count of values in that series using the seriesIndex. Return 0 if the count is 0.
-    func chartView(_ chartView: FUIChartView, numberOfValuesInSeries seriesIndex: Int) -> Int {
-        return seriesData?[seriesIndex].count ?? 0
-    }
+   // Return the number of values the Chart should display. Because this is a two dimensional array, access the count of values in that series using the seriesIndex. Return 0 if the count is 0.
+   func chartView(_ chartView: FUIChartView, numberOfValuesInSeries seriesIndex: Int) -> Int {
+       return seriesData?[seriesIndex].count ?? 0
+   }
 
-    // Get the actual value to be displayed. Again this is a two dimensional array so first retrieve the series and with help of the categoryIndex retrieve the value.
-    func chartView(_ chartView: FUIChartView, valueForSeries seriesIndex: Int, category categoryIndex: Int, dimension dimensionIndex: Int) -> Double? {
-        return seriesData?[seriesIndex][categoryIndex]
-    }
+   // Get the actual value to be displayed. Again this is a two dimensional array so first retrieve the series and with help of the categoryIndex retrieve the value.
+   func chartView(_ chartView: FUIChartView, valueForSeries seriesIndex: Int, category categoryIndex: Int, dimension dimensionIndex: Int) -> Double? {
+       return seriesData?[seriesIndex][categoryIndex]
+   }
 
-    // Return the category title with help of the category index.
-    func chartView(_ chartView: FUIChartView, titleForCategory categoryIndex: Int, inSeries seriesIndex: Int) -> String? {
-        return chartData.categories[categoryIndex]
-    }
+   // Return the category title with help of the category index.
+   func chartView(_ chartView: FUIChartView, titleForCategory categoryIndex: Int, inSeries seriesIndex: Int) -> String? {
+       return chartData.categories[categoryIndex]
+   }
 
-    // Return the formatted String value for each double value.
-    func chartView(_ chartView: FUIChartView, formattedStringForValue value: Double, axis: FUIChartAxisId) -> String? {
-        return "\(Int(value))"
-    }
+   // Return the formatted String value for each double value.
+   func chartView(_ chartView: FUIChartView, formattedStringForValue value: Double, axis: FUIChartAxisId) -> String? {
+       return "\(Int(value))"
+   }
 
-    ```
+   ```
 
 3. You're not going to do anything with the user selection of a value in this tutorial but still implement the delegate to print out a log to the console when the user taps on a value inside the chart.
 
     Add the following lines of code right below the Data Source extension as an additional extension to the class:
 
-    ```Swift
+   ```Swift
 
-    // MARK: - FUIChartViewDelegate
+   // MARK: - FUIChartViewDelegate
 
-    extension CustomerDetailTableViewController: FUIChartViewDelegate {
-        func chartView(_ chartView: FUIChartView, didChangeSelections selections: [FUIChartPlotItem]?) {
-            logger.debug("Did select FUIChartView!")
-        }
-    }
+   extension CustomerDetailTableViewController: FUIChartViewDelegate {
+       func chartView(_ chartView: FUIChartView, didChangeSelections selections: [FUIChartPlotItem]?) {
+           logger.debug("Did select FUIChartView!")
+       }
+   }
 
-    ```
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -425,73 +425,73 @@ Remember in the `updateTable()` method where the `setupProfileHeader()` method g
 
 1. Add the following lines of code right above the `numberOfSections(in:)` method and read the inline comments carefully:
 
-    ```Swift
+   ```Swift
 
-    // MARK: - Profile Header setup
+   // MARK: - Profile Header setup
 
-    private func setupProfileHeader() {
+   private func setupProfileHeader() {
 
-        // first format the birthday of the customer as you want to display that date in the Profile Header
-        let dateOfBirth = customer.dateOfBirth?.utc()
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        if let date = dateOfBirth {
-            let formattedDate = formatter.string(from: date)
-            profileHeader.headlineText = "Birthday: \(formattedDate)"
-        }
+       // first format the birthday of the customer as you want to display that date in the Profile Header
+       let dateOfBirth = customer.dateOfBirth?.utc()
+       let formatter = DateFormatter()
+       formatter.dateStyle = .medium
+       if let date = dateOfBirth {
+           let formattedDate = formatter.string(from: date)
+           profileHeader.headlineText = "Birthday: \(formattedDate)"
+       }
 
-        profileHeader.subheadlineText = "\(customer.street ?? ""), \(customer.city ?? ""), \(customer.postalCode ?? ""), \(customer.country ?? "")"
+       profileHeader.subheadlineText = "\(customer.street ?? ""), \(customer.city ?? ""), \(customer.postalCode ?? ""), \(customer.country ?? "")"
 
-        // The split percentage will indicate how the content is supposed to be distributed inside the Profile Header.
-        profileHeader.splitPercent = 0.3
+       // The split percentage will indicate how the content is supposed to be distributed inside the Profile Header.
+       profileHeader.splitPercent = 0.3
 
-        // The Activity Control is a great UI control for making direct calls, text messages or emails to the Customer.
-        let activityControl = FUIActivityControl()
-        activityControl.addActivities([.phone, .message, .email])
-        activityControl.activityItems[.phone]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
-        activityControl.activityItems[.message]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
-        activityControl.activityItems[.email]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
+       // The Activity Control is a great UI control for making direct calls, text messages or emails to the Customer.
+       let activityControl = FUIActivityControl()
+       activityControl.addActivities([.phone, .message, .email])
+       activityControl.activityItems[.phone]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
+       activityControl.activityItems[.message]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
+       activityControl.activityItems[.email]?.setTitleColor(.preferredFioriColor(forStyle: .tintColorDark), for: .normal)
 
-        // Set this View Controller as Delegate for the Activity Control
-        activityControl.delegate = self
-        profileHeader.detailContentView = activityControl
+       // Set this View Controller as Delegate for the Activity Control
+       activityControl.delegate = self
+       profileHeader.detailContentView = activityControl
 
-        // Attach the Profile Header to the Table View
-        tableView.tableHeaderView = profileHeader
-    }
+       // Attach the Profile Header to the Table View
+       tableView.tableHeaderView = profileHeader
+   }
 
-    ```
+   ```
 
 2. Now that you've set the View Controller as delegate to the Activity Control, implement another extension to conform to the protocol.
 
     Add the following lines of code directly below the `FUIChartViewDelegate` extension:
 
-    ```Swift
+   ```Swift
 
-    // MARK: - Activity Control Delegate
+   // MARK: - Activity Control Delegate
 
-    extension CustomerDetailTableViewController: FUIActivityControlDelegate {
-        func activityControl(_ activityControl: FUIActivityControl, didSelectActivity activityItem: FUIActivityItem) {
-            // Switch over the Activity Item type, create and display an Alert when the user taps those activities. You won't implement phone calls or anything here. This is just to show you the capabilities of this control.
-            switch activityItem {
-            case FUIActivityItem.phone:
-                AlertHelper.displayAlert(with: "Phone Activity tapped", error: nil, viewController: self)
-                logger.debug("Phone Activity tapped")
-                break
-            case FUIActivityItem.message:
-                AlertHelper.displayAlert(with: "Message Activity tapped", error: nil, viewController: self)
-                logger.debug("Message Activity tapped")
-                break
-            case FUIActivityItem.email:
-                AlertHelper.displayAlert(with: "Phone Activity tapped", error: nil, viewController: self)
-                logger.debug("Phone Activity tapped")
-                break
-            default:
-                return
-            }
-        }
-    }
-    ```
+   extension CustomerDetailTableViewController: FUIActivityControlDelegate {
+       func activityControl(_ activityControl: FUIActivityControl, didSelectActivity activityItem: FUIActivityItem) {
+           // Switch over the Activity Item type, create and display an Alert when the user taps those activities. You won't implement phone calls or anything here. This is just to show you the capabilities of this control.
+           switch activityItem {
+           case FUIActivityItem.phone:
+               AlertHelper.displayAlert(with: "Phone Activity tapped", error: nil, viewController: self)
+               logger.debug("Phone Activity tapped")
+               break
+           case FUIActivityItem.message:
+               AlertHelper.displayAlert(with: "Message Activity tapped", error: nil, viewController: self)
+               logger.debug("Message Activity tapped")
+               break
+           case FUIActivityItem.email:
+               AlertHelper.displayAlert(with: "Phone Activity tapped", error: nil, viewController: self)
+               logger.debug("Phone Activity tapped")
+               break
+           default:
+               return
+           }
+       }
+   }
+   ```
 
 3. Call the `setupProfileHeader()` method in the `viewDidLoad(:)` method:
 

@@ -291,30 +291,30 @@ In order to use the **Apple Push Notification service**, we need to create a **C
 
     > The advanced option allows app developers to define icons, sound, title, badge number etc. Please refer to the [official documentation](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification) for further details.
 
-    ```json
-    {
-        "alert": "Notification With A Message",
-        "badge": 0,
-        "priority": "high",
-        "sound": "DefaultNotificationSound"
-    }
-    ```
+   ```json
+   {
+       "alert": "Notification With A Message",
+       "badge": 0,
+       "priority": "high",
+       "sound": "DefaultNotificationSound"
+   }
+   ```
 
-    ```json
-    {
-        "badge": 100,
-        "priority": "high",
-        "sound": "DefaultNotificationSound"
-    }
-    ```
+   ```json
+   {
+       "badge": 100,
+       "priority": "high",
+       "sound": "DefaultNotificationSound"
+   }
+   ```
 
-    ```json
-    {
-        "alert": "Notification With Only A Message",
-        "priority": "high",
-        "sound": "DefaultNotificationSound"
-    }
-    ```
+   ```json
+   {
+       "alert": "Notification With Only A Message",
+       "priority": "high",
+       "sound": "DefaultNotificationSound"
+   }
+   ```
 
     ![Advanced Push Notifications](gif-10.gif)
 

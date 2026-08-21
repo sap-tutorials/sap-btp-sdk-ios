@@ -132,38 +132,38 @@ As you primarily use the mobile application, you want to click on the link to op
 
 2. Add the following function to the `AppDelegate` class:
 
-    ```swift
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        if userActivity.activityType == NSUserActivityTypeBrowsingWeb {
-            let url = userActivity.webpageURL
-            let host = url?.host
-            let relativePath = url?.relativePath
-            let lastPathComponent = url?.lastPathComponent
+   ```swift
+   func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+       if userActivity.activityType == NSUserActivityTypeBrowsingWeb {
+           let url = userActivity.webpageURL
+           let host = url?.host
+           let relativePath = url?.relativePath
+           let lastPathComponent = url?.lastPathComponent
 
-            // Handle the URL as per your app's logic
-            if let lastPathComponent = lastPathComponent {
-                switch lastPathComponent {
-                case "product":
-                    let alert = UIAlertController(title: "Product", message: "Product universal link.", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    window?.rootViewController?.present(alert, animated: true, completion: nil)
+           // Handle the URL as per your app's logic
+           if let lastPathComponent = lastPathComponent {
+               switch lastPathComponent {
+               case "product":
+                   let alert = UIAlertController(title: "Product", message: "Product universal link.", preferredStyle: .alert)
+                   alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                   window?.rootViewController?.present(alert, animated: true, completion: nil)
 
-                case "vendors":
-                    let alert = UIAlertController(title: "Vendors", message: "Vendor universal link.", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    window?.rootViewController?.present(alert, animated: true, completion: nil)
+               case "vendors":
+                   let alert = UIAlertController(title: "Vendors", message: "Vendor universal link.", preferredStyle: .alert)
+                   alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                   window?.rootViewController?.present(alert, animated: true, completion: nil)
 
-                default:
-                    break
-                }
-            }
+               default:
+                   break
+               }
+           }
 
-            return true
-        }
+           return true
+       }
 
-        return false
-    }
-    ```
+       return false
+   }
+   ```
 
 3. Click `▶` (Start the active scheme) in Xcode to run the application.
 
