@@ -107,36 +107,36 @@ In order to display the newly added overview screen right after the onboarding p
 
 2. Change the method code to the following:
 
-    ```Swift[12-15]
-    func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
-        // Check if an application screen has already been presented
-        guard isSplashPresented else {
-            completionHandler(nil)
-            return
-        }
+   ```Swift[12-15]
+   func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
+       // Check if an application screen has already been presented
+       guard isSplashPresented else {
+           completionHandler(nil)
+           return
+       }
 
-        // set rootViewController only once ie after onboarding when app screen is about to be shown
-        // for restore, remove covering views previously added
-        let appViewController: UIViewController
-        if isOnboarding {
-            let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UINavigationController
+       // set rootViewController only once ie after onboarding when app screen is about to be shown
+       // for restore, remove covering views previously added
+       let appViewController: UIViewController
+       if isOnboarding {
+           let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UINavigationController
 
-            appViewController = overviewTVC
+           appViewController = overviewTVC
 
-            isOnboarding = false
-            coveringViews.removeAll()
+           isOnboarding = false
+           coveringViews.removeAll()
 
-            // maintain this boolean since no splash screen is present now
-            isSplashPresented = false
-            window.rootViewController = appViewController
-        } else {
-            removeCoveringViews()
-        }
+           // maintain this boolean since no splash screen is present now
+           isSplashPresented = false
+           window.rootViewController = appViewController
+       } else {
+           removeCoveringViews()
+       }
 
-        completionHandler(nil)
-    }
+       completionHandler(nil)
+   }
 
-    ```
+   ```
 
 Great you did complete all necessary steps to replace the generated UI with your own. Go ahead and run the app on **`iPhone 12 Pro`** or any other simulator to see the result.
 
@@ -168,15 +168,15 @@ You will now implement some code to set up the `OverviewTableViewController` for
 
 1. Open the `OverviewTableViewController.swift` file and add the following import statements right below the `import UIKit` statement:
 
-    ```Swift
-    import SAPFiori
-    import SAPFoundation
-    import SAPOData
-    import SAPFioriFlows
-    import SAPCommon
-    import ESPMContainerFmwk
+   ```Swift
+   import SAPFiori
+   import SAPFoundation
+   import SAPOData
+   import SAPFioriFlows
+   import SAPCommon
+   import ESPMContainerFmwk
 
-    ```
+   ```
 
     You are going to use APIs and classes from all of those SAP BTP SDK for iOS frameworks to build the Overview screen.
 
@@ -186,112 +186,112 @@ You will now implement some code to set up the `OverviewTableViewController` for
 
 2. Instantiate two arrays as class properties:
 
-    ```Swift
+   ```Swift
 
-    private var products = [Product]()
-    private var customers = [Customer]()
+   private var products = [Product]()
+   private var customers = [Customer]()
 
-    ```
+   ```
 
 3. Because you want to use the logging API of the `SAPCommon` framework you have to retrieve and store an instance of the logger. Luckily the logger gets initialized in the `AppDelegate` through generated code by the Assistant. The logger is initialized with a default log level of **`Debug`**.
 
     Add the following line of code above the products array:
 
-    ```Swift
+   ```Swift
 
-    private let logger = Logger.shared(named: "OverviewTableViewController")
+   private let logger = Logger.shared(named: "OverviewTableViewController")
 
-    ```
+   ```
 
 4. Next, implement all the needed Table View data source and delegate methods you need. Fortunately you used a Table View Controller instead of a View Controller, and because you did that you can simply override those methods directly in class without declaring the needed protocols (`UITableViewDataSource, UITableViewDelegate`) in the class definition.
 
     Implement the needed methods below the `viewDidLoad()` method, so that your class looks like that:
 
-    ```Swift[32-81]
-    //
-    //  OverviewTableViewController.swift
-    //  TutorialApp
-    //
-    //  Created by Muessig, Kevin on 3/20/20.
-    //  Copyright © 2020 SAP. All rights reserved.
-    //
+   ```Swift[32-81]
+   //
+   //  OverviewTableViewController.swift
+   //  TutorialApp
+   //
+   //  Created by Muessig, Kevin on 3/20/20.
+   //  Copyright © 2020 SAP. All rights reserved.
+   //
 
-    import UIKit
-    import SAPFiori
-    import SAPFoundation
-    import SAPOData
-    import SAPFioriFlows
-    import SAPCommon
+   import UIKit
+   import SAPFiori
+   import SAPFoundation
+   import SAPOData
+   import SAPFioriFlows
+   import SAPCommon
 
-    class OverviewTableViewController: UITableViewController {
+   class OverviewTableViewController: UITableViewController {
 
-      private var products = [Product]()
-      private var customers = [Customer]()
+     private var products = [Product]()
+     private var customers = [Customer]()
 
-      override func viewDidLoad() {
-          super.viewDidLoad()
+     override func viewDidLoad() {
+         super.viewDidLoad()
 
-      }
+     }
 
-      // MARK: - Table view data source
+     // MARK: - Table view data source
 
-      /**
-        If you look at the image displaying the Overview Screen when done you can see that there are 2 sections.
-        One is for the customer and one for the product. If you look closely you can see the gray dividers between those sections. These are actually of type FUITableViewHeaderFooterView which makes it necessary to have sections defined for them as well. That is why the number is 4.
-      */
-      override func numberOfSections(in tableView: UITableView) -> Int {
-          return 4
-      }
+     /**
+       If you look at the image displaying the Overview Screen when done you can see that there are 2 sections.
+       One is for the customer and one for the product. If you look closely you can see the gray dividers between those sections. These are actually of type FUITableViewHeaderFooterView which makes it necessary to have sections defined for them as well. That is why the number is 4.
+     */
+     override func numberOfSections(in tableView: UITableView) -> Int {
+         return 4
+     }
 
-      /**
-        Here you tell the Table View how many rows you want to display for each section.
-        You can use the *Switch* statement to do so.
+     /**
+       Here you tell the Table View how many rows you want to display for each section.
+       You can use the *Switch* statement to do so.
 
-        - Case 1:   return 3 if the count of available products is equal or higher then 3
-        - Case 3:   return 1 if the count of available customers is equal or higher then 1. That is because you only display the FUICollectionViewTableViewCell here.
-        - Default:  return 0 because those are the dividers which are not going to display any rows.
+       - Case 1:   return 3 if the count of available products is equal or higher then 3
+       - Case 3:   return 1 if the count of available customers is equal or higher then 1. That is because you only display the FUICollectionViewTableViewCell here.
+       - Default:  return 0 because those are the dividers which are not going to display any rows.
 
-      */
-      override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-          switch section {
-          case 1: if products.count >= 3 { return 3 }
-          case 3: if customers.count >= 1 { return 1 }
-          default:
-              return 0
-          }
-          return 0
-      }
+     */
+     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+         switch section {
+         case 1: if products.count >= 3 { return 3 }
+         case 3: if customers.count >= 1 { return 1 }
+         default:
+             return 0
+         }
+         return 0
+     }
 
-      /**
-      At the moment return a UITableViewHeaderFooterView.
-      */
-      override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-          return UITableViewHeaderFooterView()
-      }
+     /**
+     At the moment return a UITableViewHeaderFooterView.
+     */
+     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+         return UITableViewHeaderFooterView()
+     }
 
-      /**
-      At the moment return a UITableViewHeaderFooterView.
-      */
-      override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-          return UITableViewHeaderFooterView()
-      }
+     /**
+     At the moment return a UITableViewHeaderFooterView.
+     */
+     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+         return UITableViewHeaderFooterView()
+     }
 
-      /**
-      At the moment return a UITableViewCell.
-      */
-      override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-          return UITableViewCell()
-      }
+     /**
+     At the moment return a UITableViewCell.
+     */
+     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+         return UITableViewCell()
+     }
 
-      // MARK: - Navigation
+     // MARK: - Navigation
 
-      // In a storyboard-based application, you will often want to do a little preparation before navigation
-      override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-          // Prepare segue for navigation
-      }
-    }
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+         // Prepare segue for navigation
+     }
+   }
 
-    ```
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -302,77 +302,77 @@ To finish building the screen's layout you are going to implement the dividers a
 
 1. First, register the `FUITableViewHeaderFooterView` in the `viewDidLoad()` method:
 
-    ```Swift[4]
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   ```Swift[4]
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
-    }
+       tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+   }
 
-    ```
+   ```
 
 2. Next, replace the `tableView(_:viewForHeaderInSection)` method with the implementation code:
 
-    ```Swift
+   ```Swift
 
-    /**
-    Dequeue the registered FUITableViewHeaderFooterView and force cast it to the respective class.
-    Again use a Switch-statement to distinguish between the different sections.
+   /**
+   Dequeue the registered FUITableViewHeaderFooterView and force cast it to the respective class.
+   Again use a Switch-statement to distinguish between the different sections.
 
-    - Case 1:   You want to see just the title for the Product section header
-    - Case 3:   You want to see title and an attribute for the Customer section header.
-    - Default:  Return the divider view.
+   - Case 1:   You want to see just the title for the Product section header
+   - Case 3:   You want to see title and an attribute for the Customer section header.
+   - Default:  Return the divider view.
 
-    */
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-       let headerFooterView = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
+   */
+   override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+      let headerFooterView = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
 
-       switch section {
-       case 1:
-           headerFooterView.style = .title
-           headerFooterView.titleLabel.text = NSLocalizedString("Products", comment: "")
-           return headerFooterView
-       case 3:
-           headerFooterView.style = .attribute
-           headerFooterView.titleLabel.text = NSLocalizedString("Customers", comment: "")
-           headerFooterView.attributeLabel.text = NSLocalizedString("See All(\(customers.count))", comment: "")
-           headerFooterView.didSelectHandler = {
-               // TODO: Implement later
-           }
-           return headerFooterView
-       default:
-           let divider = UIView()
-           divider.backgroundColor = .preferredFioriColor(forStyle: .separatorOpaque)
-           return divider
-       }
-    }
+      switch section {
+      case 1:
+          headerFooterView.style = .title
+          headerFooterView.titleLabel.text = NSLocalizedString("Products", comment: "")
+          return headerFooterView
+      case 3:
+          headerFooterView.style = .attribute
+          headerFooterView.titleLabel.text = NSLocalizedString("Customers", comment: "")
+          headerFooterView.attributeLabel.text = NSLocalizedString("See All(\(customers.count))", comment: "")
+          headerFooterView.didSelectHandler = {
+              // TODO: Implement later
+          }
+          return headerFooterView
+      default:
+          let divider = UIView()
+          divider.backgroundColor = .preferredFioriColor(forStyle: .separatorOpaque)
+          return divider
+      }
+   }
 
-    ```
+   ```
 
 3. Replace the `tableView(_:viewForFooterInSection)` method with the following code:
 
-    ```Swift
+   ```Swift
 
-    /**
-    For the Footer you display a FUITableViewHeaderFooterView set to style attribute like the customer section header.
-    If it is not the product section then show an empty UIView.
-    */
-    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-       if section == 1 {
-           let headerFooterView = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
-           headerFooterView.didSelectHandler = {
-               // TODO: Implement later
-           }
-           headerFooterView.style = .attribute
-           headerFooterView.titleLabel.text = NSLocalizedString("See All", comment: "")
-           headerFooterView.attributeLabel.text = "\(products.count)"
-           return headerFooterView
-       } else {
-           return UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
-       }
-    }
+   /**
+   For the Footer you display a FUITableViewHeaderFooterView set to style attribute like the customer section header.
+   If it is not the product section then show an empty UIView.
+   */
+   override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+      if section == 1 {
+          let headerFooterView = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
+          headerFooterView.didSelectHandler = {
+              // TODO: Implement later
+          }
+          headerFooterView.style = .attribute
+          headerFooterView.titleLabel.text = NSLocalizedString("See All", comment: "")
+          headerFooterView.attributeLabel.text = "\(products.count)"
+          return headerFooterView
+      } else {
+          return UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+      }
+   }
 
-    ```
+   ```
 
 ![Header Footer](fiori-ios-scpms-starter-mission-02-12.png)
 
@@ -450,100 +450,100 @@ Implement the following lines of code directly below the logger instance as clas
 
 2. To fetch available customers, implement the following method below the closing bracket of the `viewDidLoad()` method:
 
-    ```Swift
+   ```Swift
 
-    /**
-    First you define a DataQuery to perform an expand for the customer's sales orders.
-    This data query object you can simply pass into the fetchCustomers(:) method call. Handle the errors and display an Alert Dialogue to the user.
+   /**
+   First you define a DataQuery to perform an expand for the customer's sales orders.
+   This data query object you can simply pass into the fetchCustomers(:) method call. Handle the errors and display an Alert Dialogue to the user.
 
-    Using a DispatchGroup allows us to sequentially run background tasks and perform a certain action as soon as all tasks are completed. First you enter the group and you have to leave the group in any place where you return out of the block.
+   Using a DispatchGroup allows us to sequentially run background tasks and perform a certain action as soon as all tasks are completed. First you enter the group and you have to leave the group in any place where you return out of the block.
 
-    In case you retrieve data from the backend sort the customers by the amount of sales orders they have and set them to the array.
-    */
-    private func fetchCustomers(_ group: DispatchGroup) {
-        group.enter()
+   In case you retrieve data from the backend sort the customers by the amount of sales orders they have and set them to the array.
+   */
+   private func fetchCustomers(_ group: DispatchGroup) {
+       group.enter()
 
-        let query = DataQuery().expand(Customer.salesOrders)
-        dataService?.fetchCustomers(matching: query) { [weak self] result, error in
-            if let error = error {
-                AlertHelper.displayAlert(with: NSLocalizedString("Failed to load list of customers!", comment: ""), error: error, viewController: self!)
-                self?.logger.error("Failed to load list of customers!", error: error)
-                group.leave()
-                return
-            }
-            // sort the customer result set by the number of available sales orders by customer.
-            self?.customers.append(contentsOf: result!.sorted(by: { $0.salesOrders.count > $1.salesOrders.count }))
-            group.leave()
-        }
-    }
+       let query = DataQuery().expand(Customer.salesOrders)
+       dataService?.fetchCustomers(matching: query) { [weak self] result, error in
+           if let error = error {
+               AlertHelper.displayAlert(with: NSLocalizedString("Failed to load list of customers!", comment: ""), error: error, viewController: self!)
+               self?.logger.error("Failed to load list of customers!", error: error)
+               group.leave()
+               return
+           }
+           // sort the customer result set by the number of available sales orders by customer.
+           self?.customers.append(contentsOf: result!.sorted(by: { $0.salesOrders.count > $1.salesOrders.count }))
+           group.leave()
+       }
+   }
 
-    ```
+   ```
 
 3. Next implement the method responsible for fetching all products. Add the following lines of code below the closing bracket of the `fetchCustomers(_:)` method:
 
-    ```Swift
-    /**
-    Handle the errors and display an Alert Dialogue to the user.
+   ```Swift
+   /**
+   Handle the errors and display an Alert Dialogue to the user.
 
-    In case you retrieve data from the backend sort the customers by the amount of sales orders they have and set them to the array.
-    */
-    private func fetchProducts(_ group: DispatchGroup) {
-        group.enter()
+   In case you retrieve data from the backend sort the customers by the amount of sales orders they have and set them to the array.
+   */
+   private func fetchProducts(_ group: DispatchGroup) {
+       group.enter()
 
-        dataService?.fetchProducts() { [weak self] result, error in
-            if let error = error {
-                AlertHelper.displayAlert(with: NSLocalizedString("Failed to load list of products!", comment: ""), error: error, viewController: self!)
-                self?.logger.error("Failed to load list of products!", error: error)
-                group.leave()
-                return
-            }
-            self?.products.append(contentsOf: result!)
+       dataService?.fetchProducts() { [weak self] result, error in
+           if let error = error {
+               AlertHelper.displayAlert(with: NSLocalizedString("Failed to load list of products!", comment: ""), error: error, viewController: self!)
+               self?.logger.error("Failed to load list of products!", error: error)
+               group.leave()
+               return
+           }
+           self?.products.append(contentsOf: result!)
 
-            group.leave()
-        }
-    }
+           group.leave()
+       }
+   }
 
-    ```
+   ```
 
 4. Now let's bring both of those methods together by implementing a `loadData()` method right above the `fetchCustomers(_:)` method.
 
-    ```Swift
+   ```Swift
 
-    /**
-    Show a loading indicator as soon as the method gets called.
-    Create a DispatchGroup and call both fetch methods and pass in the created group.
+   /**
+   Show a loading indicator as soon as the method gets called.
+   Create a DispatchGroup and call both fetch methods and pass in the created group.
 
-    group.notify will be called as soon as both methods called group.leave(). If notify gets called execute the block which will hide the loading indicator, reload the data of the table view.
-    */
-    private func loadData() {
-       showFioriLoadingIndicator()
+   group.notify will be called as soon as both methods called group.leave(). If notify gets called execute the block which will hide the loading indicator, reload the data of the table view.
+   */
+   private func loadData() {
+      showFioriLoadingIndicator()
 
-       let group = DispatchGroup()
+      let group = DispatchGroup()
 
-       fetchCustomers(group)
+      fetchCustomers(group)
 
-       fetchProducts(group)
+      fetchProducts(group)
 
-       group.notify(queue: DispatchQueue.main) {
-           self.hideFioriLoadingIndicator()
-           self.tableView.reloadData()
-       }
-    }
+      group.notify(queue: DispatchQueue.main) {
+          self.hideFioriLoadingIndicator()
+          self.tableView.reloadData()
+      }
+   }
 
-    ```
+   ```
 
     > The code won't compile as you haven't conformed to the **`SAPFioriLoadingIndicator`** protocol yet.
 
 5. Let the `OverviewTableViewController` class conform to the **`SAPFioriLoadingIndicator`** protocol and implement the needed property:
 
-    ```Swift
-    class OverviewTableViewController: UITableViewController, SAPFioriLoadingIndicator {
-        var loadingIndicator: FUILoadingIndicatorView?
+   ```Swift
+   class OverviewTableViewController: UITableViewController, SAPFioriLoadingIndicator {
+       var loadingIndicator: FUILoadingIndicatorView?
 
-        //...
-    }
+       //...
+   }
 
-    ```
+   ```
 
 6. Call the `loadData()` method as last statement in the `viewDidLoad()`.
 
@@ -558,70 +558,70 @@ Before you do this you have to take care of the product image lazy loading. You'
 
 1. Add the following lines of code directly above the product array class property:
 
-    ```Swift
-    private var imageCache = [String: UIImage]()
-    private var productImageURLs = [String]()
+   ```Swift
+   private var imageCache = [String: UIImage]()
+   private var productImageURLs = [String]()
 
-    ```
+   ```
 
 2. To get the product image URLs, you need to add the following line of code to the `fetchProducts(_:)` method directly above the `self?.products.append(contentsOf: result!)` line:
 
-    ```Swift
-    self?.productImageURLs = result!.map { $0.pictureUrl ?? "" }
+   ```Swift
+   self?.productImageURLs = result!.map { $0.pictureUrl ?? "" }
 
-    ```
+   ```
 
 3. Now you only have to implement the method responsible for loading the product images. Implement the following method directly below the closing bracket of the `fetchProducts(_:)` method:
 
-    ```Swift
-    /**
-    Retrieve an instance of the AppDelegate to get access to the SAPURLSession.
-    Safe unwrap the SAPURLSession with the help of a guard-statement.
-    Start a data task to download the image using the passed in URL. If the download task is completed check for errors. and safe the loaded image in the image cache.
-    Dispatch back to the main thread and pass the loaded image.
-    */
-    private func loadImageFrom(_ url: URL, completionHandler: @escaping (_ image: UIImage) -> Void) {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        if let sapURLSession = appDelegate.sessionManager.onboardingSession?.sapURLSession {
-            sapURLSession.dataTask(with: url, completionHandler: { data, _, error in
+   ```Swift
+   /**
+   Retrieve an instance of the AppDelegate to get access to the SAPURLSession.
+   Safe unwrap the SAPURLSession with the help of a guard-statement.
+   Start a data task to download the image using the passed in URL. If the download task is completed check for errors. and safe the loaded image in the image cache.
+   Dispatch back to the main thread and pass the loaded image.
+   */
+   private func loadImageFrom(_ url: URL, completionHandler: @escaping (_ image: UIImage) -> Void) {
+       let appDelegate = UIApplication.shared.delegate as! AppDelegate
+       if let sapURLSession = appDelegate.sessionManager.onboardingSession?.sapURLSession {
+           sapURLSession.dataTask(with: url, completionHandler: { data, _, error in
 
-                if let error = error {
-                    self.logger.error("Failed to load image!", error: error)
-                    return
-                }
+               if let error = error {
+                   self.logger.error("Failed to load image!", error: error)
+                   return
+               }
 
-                if let image = UIImage(data: data!) {
-                    // safe image in image cache
-                    self.imageCache[url.absoluteString] = image
-                    DispatchQueue.main.async { completionHandler(image) }
-                }
-            }).resume()
-        }
-    }
+               if let image = UIImage(data: data!) {
+                   // safe image in image cache
+                   self.imageCache[url.absoluteString] = image
+                   DispatchQueue.main.async { completionHandler(image) }
+               }
+           }).resume()
+       }
+   }
 
-    ```
+   ```
 
 4. Before you can start dequeuing the needed cells, complete the `viewDidLoad()` method:
 
-    ```Swift[4-15]
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   ```Swift[4-15]
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        // Set the navigation item's title to "Overview".
-        navigationItem.title = NSLocalizedString("Overview", comment: "")
+       // Set the navigation item's title to "Overview".
+       navigationItem.title = NSLocalizedString("Overview", comment: "")
 
-        tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-        tableView.register(FUICollectionViewTableViewCell.self, forCellReuseIdentifier: FUICollectionViewTableViewCell.reuseIdentifier)
-        tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+       tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+       tableView.register(FUICollectionViewTableViewCell.self, forCellReuseIdentifier: FUICollectionViewTableViewCell.reuseIdentifier)
+       tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
 
-        // To make sure the FUICollectionViewTableViewCell gets displayed correctly you set the estimated row height to 180 and the row height to automatic dimension which will allow the table view to resize the cell.
-        tableView.estimatedRowHeight = 180
-        tableView.rowHeight = UITableView.automaticDimension
+       // To make sure the FUICollectionViewTableViewCell gets displayed correctly you set the estimated row height to 180 and the row height to automatic dimension which will allow the table view to resize the cell.
+       tableView.estimatedRowHeight = 180
+       tableView.rowHeight = UITableView.automaticDimension
 
-        loadData()
-    }
+       loadData()
+   }
 
-    ```
+   ```
 
 5. Before you go ahead and implement the `tableView(_:viewDidLoad:)`, you need to retrieve the URL of your service. The data task you're going to use will use the URL to download the needed product images.
 
@@ -635,73 +635,73 @@ Before you do this you have to take care of the product image lazy loading. You'
 
 7. Let's bring some life into our screen:
 
-    ```Swift[19]
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+   ```Swift[19]
+   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-      switch indexPath.section {
-      case 1:
-              // Get the needed product using the IndexPath and deque the FUIObjectTableViewCell.
-              let product = products[indexPath.row]
-              let productCell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
+     switch indexPath.section {
+     case 1:
+             // Get the needed product using the IndexPath and deque the FUIObjectTableViewCell.
+             let product = products[indexPath.row]
+             let productCell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
 
-              // Set the data to the dequeued cell.
-              productCell.headlineText = product.name ?? "-"
-              productCell.subheadlineText = product.categoryName ?? "-"
+             // Set the data to the dequeued cell.
+             productCell.headlineText = product.name ?? "-"
+             productCell.subheadlineText = product.categoryName ?? "-"
 
-              // Show In Stock or Out of Stock depending on the available quantity of the product.
-              productCell.footnoteText = product.stockDetails?.quantity?.intValue() != 0 ? NSLocalizedString("In Stock" , comment: "") : NSLocalizedString("Out of Stock", comment: "")
-              // set a placeholder image
-              productCell.detailImageView.image = FUIIconLibrary.system.imageLibrary
+             // Show In Stock or Out of Stock depending on the available quantity of the product.
+             productCell.footnoteText = product.stockDetails?.quantity?.intValue() != 0 ? NSLocalizedString("In Stock" , comment: "") : NSLocalizedString("Out of Stock", comment: "")
+             // set a placeholder image
+             productCell.detailImageView.image = FUIIconLibrary.system.imageLibrary
 
-              // This URL is found in Mobile Services API tab and is needed to fetch the product images.
-              let baseURL = <YOUR URL>
-              let url = URL(string: baseURL.appending(productImageURLs[indexPath.row]))
+             // This URL is found in Mobile Services API tab and is needed to fetch the product images.
+             let baseURL = <YOUR URL>
+             let url = URL(string: baseURL.appending(productImageURLs[indexPath.row]))
 
-              guard let unwrapped = url else {
-                  logger.info("URL for product image is nil. Returning cell without image.")
-                  return productCell
-              }
-              // check if the image is already in the cache
-              if let img = imageCache[unwrapped.absoluteString] {
-                  productCell.detailImageView.image = img
-              } else {
-                  // The image is not cached yet, so download it.
-                  loadImageFrom(unwrapped) { image in
-                      productCell.detailImageView.image = image
-                  }
-              }
-              // Only visible on regular
-              productCell.descriptionText = product.longDescription ?? ""
+             guard let unwrapped = url else {
+                 logger.info("URL for product image is nil. Returning cell without image.")
+                 return productCell
+             }
+             // check if the image is already in the cache
+             if let img = imageCache[unwrapped.absoluteString] {
+                 productCell.detailImageView.image = img
+             } else {
+                 // The image is not cached yet, so download it.
+                 loadImageFrom(unwrapped) { image in
+                     productCell.detailImageView.image = image
+                 }
+             }
+             // Only visible on regular
+             productCell.descriptionText = product.longDescription ?? ""
 
-              productCell.accessoryType = .detailDisclosureButton
+             productCell.accessoryType = .detailDisclosureButton
 
-              return productCell
-      case 3:
-          let customerCollectionViewCell = tableView.dequeueReusableCell(withIdentifier: FUICollectionViewTableViewCell.reuseIdentifier) as! FUICollectionViewTableViewCell
+             return productCell
+     case 3:
+         let customerCollectionViewCell = tableView.dequeueReusableCell(withIdentifier: FUICollectionViewTableViewCell.reuseIdentifier) as! FUICollectionViewTableViewCell
 
-          // The FUICollectionViewTableViewCell's collection view has a delegate and datasource as well. Your OverviewTableViewController will also provide those for the collection view.
-          customerCollectionViewCell.collectionView.delegate = self
-          customerCollectionViewCell.collectionView.dataSource = self
+         // The FUICollectionViewTableViewCell's collection view has a delegate and datasource as well. Your OverviewTableViewController will also provide those for the collection view.
+         customerCollectionViewCell.collectionView.delegate = self
+         customerCollectionViewCell.collectionView.dataSource = self
 
-          // Use the horizontal scroll layout to display the customers horizontally with scroll enabled in the FUICollectionViewTableViewCell. Define the layouts parameters.
-          let collectionViewLayout = FUICollectionViewLayout.horizontalScroll
-          collectionViewLayout.minimumInteritemSpacing = CGFloat(16)
-          collectionViewLayout.itemSize = CGSize(width: 120, height: 140)
-          // Be aware of recommended margins in compact (left 16) and regular (left 48) mode
-          customerCollectionViewCell.collectionView.contentInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 0)
+         // Use the horizontal scroll layout to display the customers horizontally with scroll enabled in the FUICollectionViewTableViewCell. Define the layouts parameters.
+         let collectionViewLayout = FUICollectionViewLayout.horizontalScroll
+         collectionViewLayout.minimumInteritemSpacing = CGFloat(16)
+         collectionViewLayout.itemSize = CGSize(width: 120, height: 140)
+         // Be aware of recommended margins in compact (left 16) and regular (left 48) mode
+         customerCollectionViewCell.collectionView.contentInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 0)
 
-          // Set the layout on the collection view and register the FUIItemCollectionViewCell
-          customerCollectionViewCell.collectionView.collectionViewLayout = collectionViewLayout
-          customerCollectionViewCell.collectionView.register(FUIItemCollectionViewCell.self, forCellWithReuseIdentifier: FUIItemCollectionViewCell.reuseIdentifier)
+         // Set the layout on the collection view and register the FUIItemCollectionViewCell
+         customerCollectionViewCell.collectionView.collectionViewLayout = collectionViewLayout
+         customerCollectionViewCell.collectionView.register(FUIItemCollectionViewCell.self, forCellWithReuseIdentifier: FUIItemCollectionViewCell.reuseIdentifier)
 
 
-          return customerCollectionViewCell
-      default:
-          return UITableViewCell()
-      }
-    }
+         return customerCollectionViewCell
+     default:
+         return UITableViewCell()
+     }
+   }
 
-    ```
+   ```
 
     Inside the just implemented method, assign the copied `URL` as String to the `baseURL` instead of `<YOUR URL>` placeholder.
 
@@ -710,25 +710,25 @@ Before you do this you have to take care of the product image lazy loading. You'
     To conform to these protocols you will implement a class extension where you will implement the protocol methods.
     Swift Extensions are declared outside the class's scope. Add the following extensions after the closing bracket of the `OverviewTableViewController` class:
 
-    ```Swift
-    extension OverviewTableViewController: UICollectionViewDelegate {
-        //TODO: Implement navigation
-    }
+   ```Swift
+   extension OverviewTableViewController: UICollectionViewDelegate {
+       //TODO: Implement navigation
+   }
 
-    extension OverviewTableViewController: UICollectionViewDataSource {
-        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-            return customers.count
-        }
+   extension OverviewTableViewController: UICollectionViewDataSource {
+       func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+           return customers.count
+       }
 
-        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+       func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
-            let customerCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: FUIItemCollectionViewCell.reuseIdentifier, for: indexPath) as! FUIItemCollectionViewCell
+           let customerCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: FUIItemCollectionViewCell.reuseIdentifier, for: indexPath) as! FUIItemCollectionViewCell
 
-            return customerCollectionViewCell
-        }
-    }
+           return customerCollectionViewCell
+       }
+   }
 
-    ```
+   ```
 
 9. Run the app to see the result.
 
@@ -793,87 +793,87 @@ To make the overview screen complete, you're going to add an `FUIKPIHeader` to t
 
 1. Create another class property declaring the KPI Header:
 
-    ```Swift
-    var kpiHeader: FUIKPIHeader!
+   ```Swift
+   var kpiHeader: FUIKPIHeader!
 
-    ```
+   ```
 
 2. Add a method for setting up the KPI Header, by implementing the following method directly below the `viewDidLoad()` method:
 
-    ```Swift
-    // MARK: - KPI Header
+   ```Swift
+   // MARK: - KPI Header
 
-    private func setupKPIHeader() {
+   private func setupKPIHeader() {
 
-        kpiHeader = FUIKPIHeader()
+       kpiHeader = FUIKPIHeader()
 
-        // Create a new FUIKPIView displaying the customer satisfaction.
-        let customerSatisfactionKPI = FUIKPIView()
+       // Create a new FUIKPIView displaying the customer satisfaction.
+       let customerSatisfactionKPI = FUIKPIView()
 
-        // Add a FUIKPIUnitItem for the unit and a FUIKPIMetricItem for the value itself. The value is mocked here as it is not existing in the OData service.
-        customerSatisfactionKPI.items = [FUIKPIUnitItem(string: "%"), FUIKPIMetricItem(string: "82")]
-        customerSatisfactionKPI.captionlabel.text = NSLocalizedString("Customer Satisfaction", comment: "")
-        customerSatisfactionKPI.isEnabled = false
+       // Add a FUIKPIUnitItem for the unit and a FUIKPIMetricItem for the value itself. The value is mocked here as it is not existing in the OData service.
+       customerSatisfactionKPI.items = [FUIKPIUnitItem(string: "%"), FUIKPIMetricItem(string: "82")]
+       customerSatisfactionKPI.captionlabel.text = NSLocalizedString("Customer Satisfaction", comment: "")
+       customerSatisfactionKPI.isEnabled = false
 
-        // Create a new FUIKPIView displaying the sales order count.
-        let salesOrdersKPI = FUIKPIView()
+       // Create a new FUIKPIView displaying the sales order count.
+       let salesOrdersKPI = FUIKPIView()
 
-        // Retrieve a list of the salesOrders overall.
-        let salesOrders = customers.flatMap { $0.salesOrders }
-        salesOrdersKPI.items = [FUIKPIMetricItem(string: "\(salesOrders.count)")]
-        salesOrdersKPI.captionlabel.text = NSLocalizedString("Sales Orders", comment: "")
-        salesOrdersKPI.isEnabled = false
+       // Retrieve a list of the salesOrders overall.
+       let salesOrders = customers.flatMap { $0.salesOrders }
+       salesOrdersKPI.items = [FUIKPIMetricItem(string: "\(salesOrders.count)")]
+       salesOrdersKPI.captionlabel.text = NSLocalizedString("Sales Orders", comment: "")
+       salesOrdersKPI.isEnabled = false
 
-        // Add the items to the header
-        kpiHeader.items = [customerSatisfactionKPI, salesOrdersKPI]
+       // Add the items to the header
+       kpiHeader.items = [customerSatisfactionKPI, salesOrdersKPI]
 
-        // Set the KPI Header as new table header view.
-        tableView.tableHeaderView = kpiHeader
-    }
+       // Set the KPI Header as new table header view.
+       tableView.tableHeaderView = kpiHeader
+   }
 
-    ```
+   ```
 
 3. Call the method in the `viewDidLoad()` method:
 
-    ```Swift[13]
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   ```Swift[13]
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        navigationItem.title = NSLocalizedString("Overview", comment: "")
+       navigationItem.title = NSLocalizedString("Overview", comment: "")
 
-        tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-        tableView.register(FUICollectionViewTableViewCell.self, forCellReuseIdentifier: FUICollectionViewTableViewCell.reuseIdentifier)
-        tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+       tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+       tableView.register(FUICollectionViewTableViewCell.self, forCellReuseIdentifier: FUICollectionViewTableViewCell.reuseIdentifier)
+       tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
 
-        tableView.estimatedRowHeight = 180
-        tableView.rowHeight = UITableView.automaticDimension
+       tableView.estimatedRowHeight = 180
+       tableView.rowHeight = UITableView.automaticDimension
 
-        setupKPIHeader()
-        loadData()
-    }
+       setupKPIHeader()
+       loadData()
+   }
 
-    ```
+   ```
 
 4. Also you have to call the `setupKPIHeader()` method as soon as the data is loaded to update the `KPIs`. Add the method call to the `loadData()` method:
 
-    ```Swift[12]
-    func loadData() {
-        showFioriLoadingIndicator()
+   ```Swift[12]
+   func loadData() {
+       showFioriLoadingIndicator()
 
-        let group = DispatchGroup()
+       let group = DispatchGroup()
 
-        fetchCustomers(group)
+       fetchCustomers(group)
 
-        fetchProducts(group)
+       fetchProducts(group)
 
-        group.notify(queue: DispatchQueue.main) {
-            self.hideFioriLoadingIndicator()
-            self.setupKPIHeader()
-            self.tableView.reloadData()
-        }
-    }
+       group.notify(queue: DispatchQueue.main) {
+           self.hideFioriLoadingIndicator()
+           self.setupKPIHeader()
+           self.tableView.reloadData()
+       }
+   }
 
-    ```
+   ```
 
 You completed the overview screen. Run the app on iPhone or iPad to see the result.
 

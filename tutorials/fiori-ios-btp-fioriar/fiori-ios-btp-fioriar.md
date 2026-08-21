@@ -68,9 +68,9 @@ You will use the Swift Package Manager within Xcode to pull and embed the `Fiori
 
 2. Use the **Search Field** to paste in the GitHub repository address **(1)**:
 
-    ```
-    https://github.com/SAP/cloud-sdk-ios-fiori-ar.git
-    ```
+   ```
+   https://github.com/SAP/cloud-sdk-ios-fiori-ar.git
+   ```
 
 3. The Swift package should show up **(2)**, make sure to change the **Dependency Rule** to **Up to Next Major Version (3)** in order to use the latest release.
 
@@ -120,16 +120,16 @@ Both, the `ExampleCardItem` as well as the `StringIdentifyingCardItem` models mu
 
 2. Make it conform to the `CardItemModel` protocol:
 
-    ```Swift
-    public struct ExampleCardItem: CardItemModel { }
-    ```
+   ```Swift
+   public struct ExampleCardItem: CardItemModel { }
+   ```
 
 5. Add import statements for SwiftUI and `FioriAR`:
 
-    ```Swift
-    import SwiftUI
-    import FioriAR
-    ```
+   ```Swift
+   import SwiftUI
+   import FioriAR
+   ```
 
 > The `import Foundation` is not needed in this model implementation.
 
@@ -137,35 +137,35 @@ Usually, model implementations in Swift and SwiftUI are done using `structs`. Th
 
 1. Implement the model's properties:
 
-    ```Swift
-        public var id: Int
-        public var title_: String
-        public var subtitle_: String?
-        public var detailImage_: Data?
-        public var image_: CardImage?
-        public var actionText_: String?
-        public var actionContentURL_: URL?
-        public var icon_: String?
-        public var position_: SIMD3<Float>?
-    ```
+   ```Swift
+       public var id: Int
+       public var title_: String
+       public var subtitle_: String?
+       public var detailImage_: Data?
+       public var image_: CardImage?
+       public var actionText_: String?
+       public var actionContentURL_: URL?
+       public var icon_: String?
+       public var position_: SIMD3<Float>?
+   ```
 
     As you can see the ID is of type Int for the `ExampleCardItem`.
 
 7. Repeat the process **3-6** for the `StringIdentifyingCardItem`:
 
-    ```Swift
-    public struct StringIdentifyingCardItem: CardItemModel {
-        public var id: String
-        public var title_: String
-        public var subtitle_: String?
-        public var detailImage_: Data?
-        public var image_: CardImage?
-        public var actionText_: String?
-        public var actionContentURL_: URL?
-        public var icon_: String?
-        public var position_: SIMD3<Float>?
-    }
-    ```
+   ```Swift
+   public struct StringIdentifyingCardItem: CardItemModel {
+       public var id: String
+       public var title_: String
+       public var subtitle_: String?
+       public var detailImage_: Data?
+       public var image_: CardImage?
+       public var actionText_: String?
+       public var actionContentURL_: URL?
+       public var icon_: String?
+       public var position_: SIMD3<Float>?
+   }
+   ```
 
 8. Safe both Swift files.
 
@@ -182,9 +182,9 @@ In this tutorial you will use the `ARScene` model to store, the ID which is gett
 
 2. Make the `ARScene` conform to `Identifiable` and `Codable`:
 
-    ```Swift
-    struct ARScene: Identifiable, Codable { }
-    ```
+   ```Swift
+   struct ARScene: Identifiable, Codable { }
+   ```
 
     For SwiftUI to do proper data binding you need to conform to the protocol Identifiable. The codable `typealias`, is needed for you to encode and decode an object which we need for persisting the `ARScene`. In the case of Codable, the `typealias` combines both, the Decodable and Encodable protocols.
 
@@ -195,9 +195,9 @@ In this tutorial you will use the `ARScene` model to store, the ID which is gett
 
 3. Implement a property needed for storing the `ARScene` ID from SAP Mobile Services:
 
-    ```Swift
-    var id: Int
-    ```
+   ```Swift
+   var id: Int
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -286,12 +286,12 @@ If the creation was successful you can access the mobile app definition to retri
      - OAuth Authorization
      - OAuth Token
 
-    ```Swift
-      static let clientID = "<Your-Client-ID>"
-      static let redirectURL = "<Your-Redirect-URL"
-      static let authURL = "Your-Auth-URL"
-      static let tokenURL = "Your-Token-URL"
-    ```
+   ```Swift
+     static let clientID = "<Your-Client-ID>"
+     static let redirectURL = "<Your-Redirect-URL"
+     static let authURL = "Your-Auth-URL"
+     static let tokenURL = "Your-Token-URL"
+   ```
 
 4. Save the `AuthenticationParams`.
 
@@ -309,49 +309,49 @@ If you look at the initializer of the `SceneAuthoringView(_ title:, serviceURL:,
 
 2. Add the following import statements above the `struct` definition:
 
-    ```Swift
-    import SwiftUI
-    import FioriAR
-    import SAPFoundation
-    ```
+   ```Swift
+   import SwiftUI
+   import FioriAR
+   import SAPFoundation
+   ```
 
 3. Add a `@State` property and call it `sceneIDs`:
 
-    ```Swift
-    @State private var sceneIDs = [ARScene]()
-    ```
+   ```Swift
+   @State private var sceneIDs = [ARScene]()
+   ```
 
     The `sceneIDs` is an array of `ARScene` which will hold the IDs of the created AR Scenes. The [State](https://developer.apple.com/documentation/swiftui/state) annotation is necessary because SwiftUI manages the storage of properties declared as State. That allows you to mutate the property in SwiftUI and helps the UI to update itself depending on the state of the property.
 
 4. In the body add the `SceneAuthoringView` with the following code:
 
-    ```Swift
-    SceneAuthoringView(title: "Annotations",
-                              serviceURL: URL(string: AuthenticationParams.redirectURL)!,
-                              sapURLSession: AppDelegate.sapURLSession)
-                .onSceneEdit { sceneEdit in
-                    switch sceneEdit {
-                    case .created(card: let card):
-                        print("Created: \(card.title_)")
-                    case .updated(card: let card):
-                        print("Updated: \(card.title_)")
-                    case .deleted(card: let card):
-                        print("Deleted: \(card.title_)")
-                    case .published(sceneID: let sceneID):
-                        sceneIDs.append(ARScene(id: sceneID))
-                        UserDefaults.standard.set(UserDefaultsHandler.encode(scenes: sceneIDs), forKey: ScenePersistence.key.rawValue)
-                        print("From SceneEdit:", sceneID)
-    ```
+   ```Swift
+   SceneAuthoringView(title: "Annotations",
+                             serviceURL: URL(string: AuthenticationParams.redirectURL)!,
+                             sapURLSession: AppDelegate.sapURLSession)
+               .onSceneEdit { sceneEdit in
+                   switch sceneEdit {
+                   case .created(card: let card):
+                       print("Created: \(card.title_)")
+                   case .updated(card: let card):
+                       print("Updated: \(card.title_)")
+                   case .deleted(card: let card):
+                       print("Deleted: \(card.title_)")
+                   case .published(sceneID: let sceneID):
+                       sceneIDs.append(ARScene(id: sceneID))
+                       UserDefaults.standard.set(UserDefaultsHandler.encode(scenes: sceneIDs), forKey: ScenePersistence.key.rawValue)
+                       print("From SceneEdit:", sceneID)
+   ```
 
     With the `.onSceneEdit` you get a callback and depending on what case it is you can react. For most of these cases you just print the card title in this tutorial. The case which needs more attention is the `published` as it returns the scene ID after publishing of the created scene was successful. There you append the scene ID to the `sceneIDs` property and store it to the `UserDefaults`. Using the `UserDefaultsHandler` to encode the property and storing it with something called the `ScenePersistence` enum. That enum needs to be implemented by you.
 
 5. Add an enum right above the `struct` definition and below the import statements:
 
-    ```Swift
-    enum ScenePersistence: String {
-        case key = "ScenePersistence"
-    }
-    ```
+   ```Swift
+   enum ScenePersistence: String {
+       case key = "ScenePersistence"
+   }
+   ```
 
     Of course, you can also just use a String instead of the enum but it makes sense to utilize an enum for a centralized place of holding keys in case you want to change them.
 
@@ -450,26 +450,26 @@ There is no instance of the `SAPURLSession` being created within the app, for th
 
 2. In the app file, add the `AppDelegate` class definition below the app `struct`:
 
-    ```Swift
-      class AppDelegate: NSObject, UIApplicationDelegate {
-          static var sapURLSession = SAPURLSession.createOAuthURLSession(clientID: AuthenticationParams.clientID,
-                                                                  authURL: AuthenticationParams.authURL,
-                                                                  redirectURL: AuthenticationParams.redirectURL,
-                                                                  tokenURL: AuthenticationParams.tokenURL)
+   ```Swift
+     class AppDelegate: NSObject, UIApplicationDelegate {
+         static var sapURLSession = SAPURLSession.createOAuthURLSession(clientID: AuthenticationParams.clientID,
+                                                                 authURL: AuthenticationParams.authURL,
+                                                                 redirectURL: AuthenticationParams.redirectURL,
+                                                                 tokenURL: AuthenticationParams.tokenURL)
 
-          func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-              // Register FioriNext Fonts
+         func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+             // Register FioriNext Fonts
 
-              Font.registerFioriFonts()
+             Font.registerFioriFonts()
 
-              // activate logging either for FioriAR specific logger or for all loggers (incl. SAPFoundation)
-              // Logger.shared(named: "FioriAR").logLevel = .debug
+             // activate logging either for FioriAR specific logger or for all loggers (incl. SAPFoundation)
+             // Logger.shared(named: "FioriAR").logLevel = .debug
 
-              Logger.root.logLevel = .debug // all loggers, incl. SAPFoundation
+             Logger.root.logLevel = .debug // all loggers, incl. SAPFoundation
 
-              return true
-          }
-    ```
+             return true
+         }
+   ```
 
 If you look closer, you can see that in the `application(_ didFinishWithOptions:)` method the Fiori fonts are set and the root level of the SAP logger is being set. That makes the logger more detailed and let's you see a lot which is happening within your app. You can set this to error or warning at a later point if you want to.
 
@@ -485,22 +485,22 @@ At the moment the `ARSceneAuthoringContentView` is not being called onto the nav
 
 2. Add the `FioriAR` import to it:
 
-    ```Swift
-    import FioriAR
+   ```Swift
+   import FioriAR
 
-    ```
+   ```
 
 3. Within the body, add the following code in order to add a `NavigationView` and the navigation link to the `ARSceneAuthoringContentView`:
 
-    ```Swift
-    NavigationView {
-                List {
-                    NavigationLink(destination: ARSceneAuthoringContentView()) {
-                        Text("Create a new AR Scene")
-                    }
-                }.navigationBarTitle("AR Cards Example")
-            }.navigationViewStyle(StackNavigationViewStyle())
-    ```
+   ```Swift
+   NavigationView {
+               List {
+                   NavigationLink(destination: ARSceneAuthoringContentView()) {
+                       Text("Create a new AR Scene")
+                   }
+               }.navigationBarTitle("AR Cards Example")
+           }.navigationViewStyle(StackNavigationViewStyle())
+   ```
 
     The reason why this is embedded in a List view is because you will add another navigation later on. Your initial view is a stack navigation view pointing to two views later on.
 
@@ -579,34 +579,34 @@ To further enhance the app, you will implement additional views to display the c
 
 4. Add a new view called `SceneRow` above the `ARSceneListContentView` `struct` declaration and below the import statement:
 
-    ```Swift
-    struct SceneRow: View {
-        var scene: ARScene
+   ```Swift
+   struct SceneRow: View {
+       var scene: ARScene
 
-        var body: some View {
-            NavigationLink(destination: ARSceneContentView(sceneID: scene.id)) {
-                Text(String(scene.id))   
-            }
-        }
-    }
-    ```
+       var body: some View {
+           NavigationLink(destination: ARSceneContentView(sceneID: scene.id)) {
+               Text(String(scene.id))   
+           }
+       }
+   }
+   ```
 
     This is the row view you will display in a list view.
 
 5. In the body of the `ARSceneListContentView`, add a navigation view and a list view:
 
-    ```Swift
-    NavigationView {
-            if let sceneIDs = UserDefaultsHandler.decodeSceneIDs() {
-                List(sceneIDs) { sceneID in
-                    SceneRow(scene: sceneID)
-                }
-                .navigationBarTitle("Available AR Scenes")
-            } else {
-                Text("No scenes available")
-            }
-        }.navigationViewStyle(StackNavigationViewStyle())
-    ```
+   ```Swift
+   NavigationView {
+           if let sceneIDs = UserDefaultsHandler.decodeSceneIDs() {
+               List(sceneIDs) { sceneID in
+                   SceneRow(scene: sceneID)
+               }
+               .navigationBarTitle("Available AR Scenes")
+           } else {
+               Text("No scenes available")
+           }
+       }.navigationViewStyle(StackNavigationViewStyle())
+   ```
 
     It is important to check if a scene is stored in the `UserDefaults` in order to inform the user if there is not. In that case you display a simple Text view.
 
@@ -623,61 +623,61 @@ The `ARSceneContentView` is the actual view displaying the AR scene. To do so, t
 
 2. Add the following import statements:
 
-    ```Swift
-    import SwiftUI
-    import FioriAR
-    import SAPFoundation
-    ```
+   ```Swift
+   import SwiftUI
+   import FioriAR
+   import SAPFoundation
+   ```
 
 3. Add a new view `struct` definition:
 
-    ```Swift
-    struct ARSceneContentView: View { }
-    ```
+   ```Swift
+   struct ARSceneContentView: View { }
+   ```
 
 4. In the view add **2** [`StateObject` - Apple Developer](https://developer.apple.com/documentation/swiftui/stateobject) and a `sceneID` property:
 
-    ```Swift
-    @StateObject var arModel = ARAnnotationViewModel<CodableCardItem>()
-    @StateObject private var asyncStrategy: ServiceStrategy<CodableCardItem>
-    var sceneID: Int
-    ```
+   ```Swift
+   @StateObject var arModel = ARAnnotationViewModel<CodableCardItem>()
+   @StateObject private var asyncStrategy: ServiceStrategy<CodableCardItem>
+   var sceneID: Int
+   ```
 
 5. Create an initializer with the `sceneID` as a parameter:
 
-    ```Swift
-    init(sceneID: Int) {
-        self.sceneID = sceneID
-        self._asyncStrategy = StateObject(wrappedValue: ServiceStrategy<CodableCardItem>(
-          serviceURL: URL(string: AuthenticationParams.redirectURL)!,
-          sapURLSession: AppDelegate.sapURLSession,
-          sceneIdentifier: SceneIdentifyingAttribute.id(sceneID)))
-    }
-    ```
+   ```Swift
+   init(sceneID: Int) {
+       self.sceneID = sceneID
+       self._asyncStrategy = StateObject(wrappedValue: ServiceStrategy<CodableCardItem>(
+         serviceURL: URL(string: AuthenticationParams.redirectURL)!,
+         sapURLSession: AppDelegate.sapURLSession,
+         sceneIdentifier: SceneIdentifyingAttribute.id(sceneID)))
+   }
+   ```
 
 6. In the view's body, initialize the `ARAnnotationsView`, and on appearance of the view, load the initial data:
 
-    ```Swift
-    ARAnnotationsView(arModel: arModel,
-                    cardAction: { id in
-                    // set the card action for id corresponding to the CardItemModel
+   ```Swift
+   ARAnnotationsView(arModel: arModel,
+                   cardAction: { id in
+                   // set the card action for id corresponding to the CardItemModel
 
-                    print(id)
-    })
-    .onAppear(perform: loadInitialData)
-    ```
+                   print(id)
+   })
+   .onAppear(perform: loadInitialData)
+   ```
 
 7. Implement the `loadInitialData()` method:
 
-    ```Swift
-    func loadInitialData() {
-        do {
-            try self.arModel.loadAsync(loadingStrategy: asyncStrategy)
-        } catch {
-            print(error)
-        }
-    }
-    ```
+   ```Swift
+   func loadInitialData() {
+       do {
+           try self.arModel.loadAsync(loadingStrategy: asyncStrategy)
+       } catch {
+           print(error)
+       }
+   }
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -688,11 +688,11 @@ The `ARSceneContentView` is the actual view displaying the AR scene. To do so, t
 
 2. Add another navigation link to the list view:
 
-    ```Swift
-    NavigationLink(destination: ARSceneListContentView()) {
-        Text("Show available AR Scene(s)")
-    }
-    ```
+   ```Swift
+   NavigationLink(destination: ARSceneListContentView()) {
+       Text("Show available AR Scene(s)")
+   }
+   ```
 
 3. Save the project.
 

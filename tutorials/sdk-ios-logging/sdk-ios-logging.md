@@ -66,35 +66,35 @@ Following you will add a logging statement indicating that the application view 
 
 2. Add a logging statement that will output a debug log:
 
-    ```swift
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        self.logger.debug("Demo application successfully loaded")
+   ```swift
+   override func viewDidLoad() {
+       super.viewDidLoad()
+       
+       self.logger.debug("Demo application successfully loaded")
 
-        //...
-    }
-    ```
+       //...
+   }
+   ```
 
 3. (Optional) In addition to plain text, you can also supply an optional *error* object. Refer to the [documentation](https://help.sap.com/doc/978e4f6c968c4cc5a30f9d324aa4b1d7/Latest/en-US/Documents/Frameworks/SAPCommon/Logging.html) for more details.
 
-    ```swift
-    if let error = error {
-        self.logger.error("An error happened: ", error: error)
-    }
-    ```
+   ```swift
+   if let error = error {
+       self.logger.error("An error happened: ", error: error)
+   }
+   ```
 
     >If you can't reference the *`logger`* object make sure *`SAPCommon`* is imported and got initiated in the View controller. It should look like this:
 
-    ```swift
-    import SAPCommon
+   ```swift
+   import SAPCommon
 
-    class MyViewController: UIViewController {
+   class MyViewController: UIViewController {
 
-        private let logger = Logger.shared(withName: "MyViewController")
-        
-    }
-    ```
+       private let logger = Logger.shared(withName: "MyViewController")
+       
+   }
+   ```
 
 [DONE]
 [ACCORDION-END]

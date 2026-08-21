@@ -101,36 +101,36 @@ In order to display the newly added overview screen right after the onboarding p
 
 2. Change the method code to the following:
 
-    ```Swift[15-16]
-    func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
-        // Check if an application screen has already been presented
-        guard isSplashPresented else {
-            completionHandler(nil)
-            return
-        }
+   ```Swift[15-16]
+   func showApplicationScreen(completionHandler: @escaping (Error?) -> Void) {
+       // Check if an application screen has already been presented
+       guard isSplashPresented else {
+           completionHandler(nil)
+           return
+       }
 
-        // set rootViewController only once ie after onboarding when app screen is about to be shown
-        // for restore, remove covering views previously added
-        let appViewController: UIViewController
-        if isOnboarding {
-            let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UINavigationController
+       // set rootViewController only once ie after onboarding when app screen is about to be shown
+       // for restore, remove covering views previously added
+       let appViewController: UIViewController
+       if isOnboarding {
+           let overviewTVC = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as! UINavigationController
 
-            appViewController = overviewTVC
+           appViewController = overviewTVC
 
-            isOnboarding = false
-            coveringViews.removeAll()
+           isOnboarding = false
+           coveringViews.removeAll()
 
-            // maintain this boolean since no splash screen is present now
-            isSplashPresented = false
-            window.rootViewController = appViewController
-        } else {
-            removeCoveringViews()
-        }
+           // maintain this boolean since no splash screen is present now
+           isSplashPresented = false
+           window.rootViewController = appViewController
+       } else {
+           removeCoveringViews()
+       }
 
-        completionHandler(nil)
-    }
+       completionHandler(nil)
+   }
 
-    ```
+   ```
 
 Great you did all necessary steps to replace the generated UI with your own. Go ahead and run the app on **`iPhone 12 Pro`** or any other simulator to see the result.
 

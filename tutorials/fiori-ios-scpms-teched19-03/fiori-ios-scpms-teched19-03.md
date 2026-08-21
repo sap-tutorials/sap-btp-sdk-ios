@@ -34,18 +34,18 @@ This is fairly simple thanks to the SAP BTP SDK for iOS and the generated model 
 
 1. Open up the `OverviewViewController.swift` class and right below the `import UIKit` add the following import statements:
 
-    ```Swift
+   ```Swift
 
-    import SAPFiori
-    import SAPOData
-    import SAPOfflineOData
-    import SAPCommon
-    import SAPFoundation
-    import SAPFioriFlows
-    import ESPMContainerFmwk
-    import SharedFmwk
+   import SAPFiori
+   import SAPOData
+   import SAPOfflineOData
+   import SAPCommon
+   import SAPFoundation
+   import SAPFioriFlows
+   import ESPMContainerFmwk
+   import SharedFmwk
 
-    ```
+   ```
 
     These import statements will import SAP's UI framework, the OData Online as well as the Offline framework, and the Common framework containing the Logging API.
 
@@ -53,151 +53,151 @@ This is fairly simple thanks to the SAP BTP SDK for iOS and the generated model 
 
     Add the following lines of code inside the class brackets and right below the class definition:
 
-    ```Swift
+   ```Swift
 
-    // The Logger is already setup in the AppDelegate through the SAP BTP SDK Assistant for iOS , that's why you can easily can get an instance here.
-    private let logger = Logger.shared(named: "OverviewViewController")
+   // The Logger is already setup in the AppDelegate through the SAP BTP SDK Assistant for iOS , that's why you can easily can get an instance here.
+   private let logger = Logger.shared(named: "OverviewViewController")
 
-    private var customers = [Customer]()
-    private var products = [Product]()
+   private var customers = [Customer]()
+   private var products = [Product]()
 
-    ```
+   ```
 
 3. To give the user feedback of the loading process, you're going to use a `FUILoadingIndicatorView`. The assistant generates a helper protocol providing you with convenient way to display a loading indicator.
 
     Add the `SAPFioriLoadingIndicator` class protocol to your class definition:
 
-    ```Swift
+   ```Swift
 
-    class OverviewViewController: UITableViewController, SAPFioriLoadingIndicator
+   class OverviewViewController: UITableViewController, SAPFioriLoadingIndicator
 
-    ```
+   ```
 
     The protocol requires you to add a reference to a `FUILoadingIndicatorView` instance.
 
     Add the following line of code right below the products array:
 
-    ```Swift
+   ```Swift
 
-    var loadingIndicator: FUILoadingIndicatorView?
+   var loadingIndicator: FUILoadingIndicatorView?
 
-    ```
+   ```
 
 4. Next you will implement code which is responsible for retrieving and storing a data service instance.
 
     Add the following lines of code as class properties to the `OverviewViewController.swift` class:
 
-    ```Swift
-    /// First retrieve the destinations your app can talk to from the AppParameters.
-    let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
+   ```Swift
+   /// First retrieve the destinations your app can talk to from the AppParameters.
+   let destinations = FileConfigurationProvider("AppParameters").provideConfiguration().configuration["Destinations"] as! NSDictionary
 
-    var dataService: ESPMContainer<OfflineODataProvider>? {
-        guard let odataController = OnboardingSessionManager.shared.onboardingSession?.odataControllers[ODataContainerType.eSPMContainer.description] as? ESPMContainerOfflineODataController, let dataService = odataController.dataService else {
-            AlertHelper.displayAlert(with: "OData service is not reachable, please onboard again.", error: nil, viewController: self)
-            return nil
-        }
-        return dataService
-    }
+   var dataService: ESPMContainer<OfflineODataProvider>? {
+       guard let odataController = OnboardingSessionManager.shared.onboardingSession?.odataControllers[ODataContainerType.eSPMContainer.description] as? ESPMContainerOfflineODataController, let dataService = odataController.dataService else {
+           AlertHelper.displayAlert(with: "OData service is not reachable, please onboard again.", error: nil, viewController: self)
+           return nil
+       }
+       return dataService
+   }
 
-    ```
+   ```
 
 5. Implement a method for loading the initial data used to populate the Table View.
 
     Add the following method right below the `viewDidLoad(:)` method:
 
-    ```Swift
+   ```Swift
 
-    private func loadInitialData() {
-      // start showing the loading indicator
-      self.showFioriLoadingIndicator()
+   private func loadInitialData() {
+     // start showing the loading indicator
+     self.showFioriLoadingIndicator()
 
-      // Using a DispatchGroup will help you to get notified when all the needed data sets are loaded
-      let group = DispatchGroup()
+     // Using a DispatchGroup will help you to get notified when all the needed data sets are loaded
+     let group = DispatchGroup()
 
-      // Fetch customers and products, pass in the DispatchGroup to handle entering and leaving of the group
-      fetchCustomers(group)
+     // Fetch customers and products, pass in the DispatchGroup to handle entering and leaving of the group
+     fetchCustomers(group)
 
-      fetchProducts(group)
+     fetchProducts(group)
 
-      // When all data tasks are completed, hide the loading indicator and reload the table view. This will cause a refresh of the UI, displaying the newly loaded data
-      group.notify(queue: DispatchQueue.main) {
-          self.hideFioriLoadingIndicator()
-          self.tableView.reloadData()
-      }
-    }
+     // When all data tasks are completed, hide the loading indicator and reload the table view. This will cause a refresh of the UI, displaying the newly loaded data
+     group.notify(queue: DispatchQueue.main) {
+         self.hideFioriLoadingIndicator()
+         self.tableView.reloadData()
+     }
+   }
 
-    ```
+   ```
 
     Adding the method above will result in compile time errors because the `fetchCustomers(_:)` and `fetchProducts(_:)` methods are not implemented yet.
 
 6. Add the following lines of code below the `loadInitialData()` method to implement the query for customers:
 
-    ```Swift
+   ```Swift
 
-    private func fetchCustomers(_ group: DispatchGroup) {
-        // Enter the DispatchGroup
-        group.enter()
+   private func fetchCustomers(_ group: DispatchGroup) {
+       // Enter the DispatchGroup
+       group.enter()
 
-        // Define a Data Query which is a class of the SAPOData framework. This query will tell the OData Service to also load the available Sales Orders for each Customer
-        let query = DataQuery().expand(Customer.salesOrders)
+       // Define a Data Query which is a class of the SAPOData framework. This query will tell the OData Service to also load the available Sales Orders for each Customer
+       let query = DataQuery().expand(Customer.salesOrders)
 
-        // Now call the data service and fetch the customers matching the above defined query. When during runtime the block gets entered you expect a result or an error. Also you want to hold a weak reference of self to not run into object reference issues during runtime.
-        dataService?.fetchCustomers(matching: query) { [weak self] result, error in
+       // Now call the data service and fetch the customers matching the above defined query. When during runtime the block gets entered you expect a result or an error. Also you want to hold a weak reference of self to not run into object reference issues during runtime.
+       dataService?.fetchCustomers(matching: query) { [weak self] result, error in
 
-            // If there is an error show an AlertDialog using the generated convenience class AlertHelper. Also log the error to the console and leave the /group.
-            if let error = error {
-                AlertHelper.displayAlert(with: "Failed to load list of customers!", error: error, viewController: self!)
-                self?.logger.error("Failed to load list of customers!", error: error)
-                group.leave()
-                return
-            }
-            // sort the customer result set by the number of available sales orders by customer.
-            self?.customers = result!.sorted(by: { $0.salesOrders.count > $1.salesOrders.count })
+           // If there is an error show an AlertDialog using the generated convenience class AlertHelper. Also log the error to the console and leave the /group.
+           if let error = error {
+               AlertHelper.displayAlert(with: "Failed to load list of customers!", error: error, viewController: self!)
+               self?.logger.error("Failed to load list of customers!", error: error)
+               group.leave()
+               return
+           }
+           // sort the customer result set by the number of available sales orders by customer.
+           self?.customers = result!.sorted(by: { $0.salesOrders.count > $1.salesOrders.count })
 
-            group.leave()
-        }
-    }
+           group.leave()
+       }
+   }
 
-    ```
+   ```
 
 7. Add the following lines of code below the `fetchCustomers(_:)` method to implement the query for products:
 
-    ```Swift
+   ```Swift
 
-    private func fetchProducts(_ group: DispatchGroup) {
-        // Enter the DispatchGroup
-        group.enter()
+   private func fetchProducts(_ group: DispatchGroup) {
+       // Enter the DispatchGroup
+       group.enter()
 
-        // Define a Data Query only fetching the top 5 products.
-        let query = DataQuery().top(5)
+       // Define a Data Query only fetching the top 5 products.
+       let query = DataQuery().top(5)
 
-        dataService?.fetchProducts(matching: query) { [weak self] result, error in
-            if let error = error {
-                AlertHelper.displayAlert(with: "Failed to load list of products!", error: error, viewController: self!)
-                self?.logger.error("Failed to load list of products!", error: error)
-                group.leave()
-                return
-            }
-            self?.products = result!
-            group.leave()
-        }
-    }
+       dataService?.fetchProducts(matching: query) { [weak self] result, error in
+           if let error = error {
+               AlertHelper.displayAlert(with: "Failed to load list of products!", error: error, viewController: self!)
+               self?.logger.error("Failed to load list of products!", error: error)
+               group.leave()
+               return
+           }
+           self?.products = result!
+           group.leave()
+       }
+   }
 
-    ```
+   ```
 
 8. The last step is to call the `loadInitialData()` method when the `OverviewViewController` class is loaded.
 
     Add the following line of code as the last line in the `viewDidLoad(:)`:
 
-    ```Swift[4]
+   ```Swift[4]
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        loadInitialData()
-    }
+       loadInitialData()
+   }
 
-    ```
+   ```
 
     Now every time our Overview View Controller gets loaded it will load the needed data from the OData Service.
 
@@ -210,25 +210,25 @@ Now that the `OverviewViewController` is loading data, it's time to implement th
 
 1. Add the following lines of code to `viewDidLoad(:)` method, just below the call to its superclass:
 
-    ```Swift[4-13]
-    override func viewDidLoad() {
-           super.viewDidLoad()
+   ```Swift[4-13]
+   override func viewDidLoad() {
+          super.viewDidLoad()
 
-           self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
+          self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
 
-           // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
-           // This will cause the Table View to display a cell for at least 80 points.
-           tableView.estimatedRowHeight = 80
-           tableView.rowHeight = UITableView.automaticDimension
+          // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
+          // This will cause the Table View to display a cell for at least 80 points.
+          tableView.estimatedRowHeight = 80
+          tableView.rowHeight = UITableView.automaticDimension
 
-           // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
-           tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-           tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+          // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
+          tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+          tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
 
-           loadInitialData()
-       }
+          loadInitialData()
+      }
 
-    ```
+   ```
 
 2. To distinct the customers from the products in the Table View you can use Table View Headers to display section headers. To make the UI more appealing Table View Footers are a great way to create separators.
 
@@ -236,33 +236,33 @@ Now that the `OverviewViewController` is loading data, it's time to implement th
 
     Add the following methods to the Table View Controller, place them right above the `tableView(_:numberOfRowsInSection:)` method:
 
-    ```Swift
+   ```Swift
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
-    }
+   override func numberOfSections(in tableView: UITableView) -> Int {
+       return 0
+   }
 
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return nil
-    }
+   override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+       return nil
+   }
 
-    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
+   override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+       return nil
+   }
 
-    ```
+   ```
 
 3. To actually react to user interaction on the Table View Cells, the Table View's delegate protocol provides a method to react to Table View Row selection.
 
     Add the following method below the `tableView(_:numberOfRowsInSection:)` method:
 
-    ```Swift
+   ```Swift
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //TODO: Implement
-    }
+   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       //TODO: Implement
+   }
 
-    ```
+   ```
 
 4. Your class should look something like this now:
 
@@ -424,130 +424,130 @@ In the previous step you registered the needed cells, set up the Table View and 
 
     Return **2** in the `numberOfSections(in:)`:
 
-    ```Swift[2]
+   ```Swift[2]
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
+   override func numberOfSections(in tableView: UITableView) -> Int {
+       return 2
+   }
 
-    ```
+   ```
 
 2. Every section should be distinctive, for that you can tell the Table View what Table View Headers it should display.
 
     Implement the `tableView(_:viewForHeaderInSection:)` like the following:
 
-    ```Swift[3-22]
+   ```Swift[3-22]
 
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+   override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
 
-        // First dequeue the Header Footer View you registered in the viewDidLoad(:).
-        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
+       // First dequeue the Header Footer View you registered in the viewDidLoad(:).
+       let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: FUITableViewHeaderFooterView.reuseIdentifier) as! FUITableViewHeaderFooterView
 
-        // Set it's style to title.
-        header.style = .title
-        header.separators = .bottom
+       // Set it's style to title.
+       header.style = .title
+       header.separators = .bottom
 
-        // For the first section give back a Header that is for the customers and the second is for the products
-        switch section {
-        case 0:
-            header.titleLabel.text = "Customers"
-            break
-        case 1:
-            header.titleLabel.text = "Products"
-            break
-        default:
-            break
-        }
+       // For the first section give back a Header that is for the customers and the second is for the products
+       switch section {
+       case 0:
+           header.titleLabel.text = "Customers"
+           break
+       case 1:
+           header.titleLabel.text = "Products"
+           break
+       default:
+           break
+       }
 
-        return header
-    }
+       return header
+   }
 
-    ```
+   ```
 
 3. The Footer of the sections will be used as dividers. Those dividers don't have a functional meaning but make the UI cleaner.
 
     Implement the `tableView(_:viewForFooterInSection:)` as the following:
 
-    ```Swift[2-7]
+   ```Swift[2-7]
 
-    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        if section == 1 { return UIView() }
+   override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+       if section == 1 { return UIView() }
 
-        let divider = UITableViewHeaderFooterView()
-        divider.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
+       let divider = UITableViewHeaderFooterView()
+       divider.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
 
-        return divider
-    }
+       return divider
+   }
 
-    ```
+   ```
 
 4. Now coming to the actual needed data source methods. The `tableView(_:numberOfRowsInSection:)` is fairly simple to implement:
 
-    ```Swift[3-12]
+   ```Swift[3-12]
 
-    // If the data arrays are empty return 0, else return 5.
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch section {
-        case 0:
-            if customers.isEmpty { return 0 }
-        case 1:
-            if products.isEmpty { return 0 }
-        default:
-            return 0
-        }
+   // If the data arrays are empty return 0, else return 5.
+   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+       switch section {
+       case 0:
+           if customers.isEmpty { return 0 }
+       case 1:
+           if products.isEmpty { return 0 }
+       default:
+           return 0
+       }
 
-        return 5
-    }
+       return 5
+   }
 
-    ```
+   ```
 
 5. Coming to the exciting part, implementing the `tableView(_:cellForRowAt:)` method. This method is going to be called by the table view every time it wants to dequeue a cell.
 
     Implement the following code and read the inline comments carefully:
 
-    ```Swift
+   ```Swift
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        // Dequeue the FUIObjectTableViewCell and cast it accordingly.
-        let cell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
+       // Dequeue the FUIObjectTableViewCell and cast it accordingly.
+       let cell = tableView.dequeueReusableCell(withIdentifier: FUIObjectTableViewCell.reuseIdentifier) as! FUIObjectTableViewCell
 
-        // Set the accessory type of the cell to disclosure, this will indicate to the user that those cells are tappable.
-        cell.accessoryType = .disclosureIndicator
+       // Set the accessory type of the cell to disclosure, this will indicate to the user that those cells are tappable.
+       cell.accessoryType = .disclosureIndicator
 
-        // Distinct the cell setup depending on the section.
-        switch indexPath.section {
-        case 0:
+       // Distinct the cell setup depending on the section.
+       switch indexPath.section {
+       case 0:
 
-            // Get the currently needed customer and fill the cell's properties
-            let customer = customers[indexPath.row]
-            cell.headlineText = "\(customer.firstName ?? "") \(customer.lastName ?? "")"
-            cell.subheadlineText = "\(customer.city ?? ""), \(customer.country ?? "")"
-            cell.footnoteText = "# Sales Orders : \(customer.salesOrders.count)"
-            return cell
-        case 1:
+           // Get the currently needed customer and fill the cell's properties
+           let customer = customers[indexPath.row]
+           cell.headlineText = "\(customer.firstName ?? "") \(customer.lastName ?? "")"
+           cell.subheadlineText = "\(customer.city ?? ""), \(customer.country ?? "")"
+           cell.footnoteText = "# Sales Orders : \(customer.salesOrders.count)"
+           return cell
+       case 1:
 
-            // Get the currently needed product and fill the cell's properties
-            let product = products[indexPath.row]
-            cell.headlineText = product.name ?? ""
-            cell.subheadlineText = product.categoryName ?? ""
+           // Get the currently needed product and fill the cell's properties
+           let product = products[indexPath.row]
+           cell.headlineText = product.name ?? ""
+           cell.subheadlineText = product.categoryName ?? ""
 
-            // If there is a product price set, format it with the help of a NumberFormatter
-            if let price = product.price {
-                let formatter = NumberFormatter()
-                formatter.numberStyle = .currency
-                let formattedPrice = formatter.string(for: price.intValue())
+           // If there is a product price set, format it with the help of a NumberFormatter
+           if let price = product.price {
+               let formatter = NumberFormatter()
+               formatter.numberStyle = .currency
+               let formattedPrice = formatter.string(for: price.intValue())
 
-                cell.footnoteText = formattedPrice ?? ""
-            }
+               cell.footnoteText = formattedPrice ?? ""
+           }
 
-            return cell
-        default:
-            return UITableViewCell()
-        }
-    }
+           return cell
+       default:
+           return UITableViewCell()
+       }
+   }
 
-    ```
+   ```
 
 6. Your table view controller should look something like this now:
 
@@ -825,49 +825,49 @@ private let showCustomerDetailSegue = "showCustomerDetail"
 
 2. You can utilize the `prepare(for:sender:)` method to do all of that, open the `OverviewTableViewController` and implement the following code right below `tableView(_:cellForRowAt:)`:
 
-    ```Swift
+   ```Swift
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Implement a switch over the segue identifiers to distinct which segue get's called.
-        if segue.identifier == showCustomerDetailSegue {
+   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+       // Implement a switch over the segue identifiers to distinct which segue get's called.
+       if segue.identifier == showCustomerDetailSegue {
 
-              // Show the selected Customer on the Detail view
-              guard let indexPath = self.tableView.indexPathForSelectedRow else {
-                  return
-              }
+             // Show the selected Customer on the Detail view
+             guard let indexPath = self.tableView.indexPathForSelectedRow else {
+                 return
+             }
 
-              // Retrieve the selected customer
-              let selectedEntity = self.customers[indexPath.row]
+             // Retrieve the selected customer
+             let selectedEntity = self.customers[indexPath.row]
 
-              // Get an instance of the CustomerDetailTableViewController with asking the segue for it's destination.
-              let detailViewController = segue.destination as! CustomerDetailTableViewController
+             // Get an instance of the CustomerDetailTableViewController with asking the segue for it's destination.
+             let detailViewController = segue.destination as! CustomerDetailTableViewController
 
-              // Check if the customer ID is set, if not handle the errors and notify the user.
-              guard let customerID = selectedEntity.customerID else {
-                  AlertHelper.displayAlert(with: "We're having issues displaying the details for the customer with name \(selectedEntity.lastName ?? "")", error: nil, viewController: self)
-                  self.logger.error("Unexpectedly customerID is nil! Can't pass customerID into CustomerDetailViewController.")
-                  return
-              }
+             // Check if the customer ID is set, if not handle the errors and notify the user.
+             guard let customerID = selectedEntity.customerID else {
+                 AlertHelper.displayAlert(with: "We're having issues displaying the details for the customer with name \(selectedEntity.lastName ?? "")", error: nil, viewController: self)
+                 self.logger.error("Unexpectedly customerID is nil! Can't pass customerID into CustomerDetailViewController.")
+                 return
+             }
 
-              // Set the customer ID at the CustomerDetailTableViewController.
-              detailViewController.customerId = customerID
+             // Set the customer ID at the CustomerDetailTableViewController.
+             detailViewController.customerId = customerID
 
-              // Set the title of the navigation item on the CustomerDetailTableViewController
-              detailViewController.navigationItem.title = "\(self.customers[indexPath.row].firstName ?? ""), \(self.customers[indexPath.row].lastName ?? "")"  
-        }
-    }
+             // Set the title of the navigation item on the CustomerDetailTableViewController
+             detailViewController.navigationItem.title = "\(self.customers[indexPath.row].firstName ?? ""), \(self.customers[indexPath.row].lastName ?? "")"  
+       }
+   }
 
-    ```
+   ```
 
     Right now that code won't compile because you're currently missing the constants that hold the segue identifier as well as the customer ID property on the `CustomerDetailTableViewController`.
 
 3. Next open up the `CustomerDetailTableViewController` and add the following lines of code right above the `viewDidLoad(:)` method:
 
-    ```Swift
+   ```Swift
 
-    var customerId: String!
+   var customerId: String!
 
-    ```
+   ```
 
     All the code should compile now.
 

@@ -37,10 +37,10 @@ In order for the user to pick an image for the classification you will implement
 
     In code the following line will appear:
 
-    ```Swift
+   ```Swift
 
-    @IBOutlet var actionListButton: UIBarButtonItem!
-    ```
+   @IBOutlet var actionListButton: UIBarButtonItem!
+   ```
 
 3. Next you will need an `IBAction` for handling user's interaction with that button.
 
@@ -50,12 +50,12 @@ In order for the user to pick an image for the classification you will implement
 
     The following method stub will appear in code:
 
-    ```Swift
+   ```Swift
 
-    @IBAction func didPressActionListButton(_ sender: UIBarButtonItem) {
+   @IBAction func didPressActionListButton(_ sender: UIBarButtonItem) {
 
-    }
-    ```
+   }
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -66,84 +66,84 @@ In order for the user to pick an image for the classification you will implement
 
     Add the following lines of code below the segue property:
 
-    ```Swift
+   ```Swift
 
-    private let pickerController = UIImagePickerController()
-    private var pickedImage: UIImage!
+   private let pickerController = UIImagePickerController()
+   private var pickedImage: UIImage!
 
-    ```
+   ```
 
     Disregard the compile time error for the moment as this is just showing you that you have to conform to the protocol. You will do this at a later point.
 
 2. Next implement a method with the name `setupImagePicker` below the just added `IBAction`:
 
-    ```Swift
+   ```Swift
 
-    private func setupImagePicker() {
-        pickerController.delegate = self
-        pickerController.allowsEditing = false
+   private func setupImagePicker() {
+       pickerController.delegate = self
+       pickerController.allowsEditing = false
 
-        // Only allow images here
-        pickerController.mediaTypes = ["public.image"]
-    }
+       // Only allow images here
+       pickerController.mediaTypes = ["public.image"]
+   }
 
-    ```
+   ```
 
 3. Next call that just added method in the `viewDidLoad(:)` right above the `loadInitialData()` method call:
 
-    ```Swift[15]
+   ```Swift[15]
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
+       self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
 
-        // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
-        // This will cause the Table View to display a cell for at least 80 points.
-        tableView.estimatedRowHeight = 80
-        tableView.rowHeight = UITableView.automaticDimension
+       // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
+       // This will cause the Table View to display a cell for at least 80 points.
+       tableView.estimatedRowHeight = 80
+       tableView.rowHeight = UITableView.automaticDimension
 
-        // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
-        tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-        tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+       // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
+       tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+       tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
 
-        setupImagePicker()
-        loadInitialData()
-    }
+       setupImagePicker()
+       loadInitialData()
+   }
 
-    ```
+   ```
 
     The compiler will currently complain because the `OverviewTableViewController.swift` is not conforming to the `UIImagePickerControllerDelegate` or the `UINavigationControllerDelegate`.
 
 4. Add an extension below the closing class brackets, read the inline comments for more information:
 
-    ```Swift
+   ```Swift
 
-    extension OverviewTableViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+   extension OverviewTableViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
-      // If the Image Picker Controller did get cancelled, just dismiss the Image Picker Controller
-      public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-              picker.dismiss(animated: true, completion: nil)
-          }
+     // If the Image Picker Controller did get cancelled, just dismiss the Image Picker Controller
+     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+             picker.dismiss(animated: true, completion: nil)
+         }
 
-      // If the user picked an image check if the image can be unwrapped to an UIImage, if not log an error and dismiss the Image Picker
-      public func imagePickerController(_ picker: UIImagePickerController,
-                                        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-          guard let image = info[.originalImage] as? UIImage else {
-              logger.error("Image is nil! Please check UIImagePicker implementation.")
-              return picker.dismiss(animated: true, completion: nil)
-          }
+     // If the user picked an image check if the image can be unwrapped to an UIImage, if not log an error and dismiss the Image Picker
+     public func imagePickerController(_ picker: UIImagePickerController,
+                                       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+         guard let image = info[.originalImage] as? UIImage else {
+             logger.error("Image is nil! Please check UIImagePicker implementation.")
+             return picker.dismiss(animated: true, completion: nil)
+         }
 
-          // If all went good, please assign the picked image to the pickedImage property, dismiss the the Image Picker and perform the segue to the classification View Controller
-          pickedImage = image
-          picker.dismiss(animated: true) {
-              self.performSegue(withIdentifier: self.showProductClassificationSegue, sender: self)
-          }
-      }
+         // If all went good, please assign the picked image to the pickedImage property, dismiss the the Image Picker and perform the segue to the classification View Controller
+         pickedImage = image
+         picker.dismiss(animated: true) {
+             self.performSegue(withIdentifier: self.showProductClassificationSegue, sender: self)
+         }
+     }
 
-    }
+   }
 
-    ```
+   ```
 
     Continue to the next step to implement a segue to a new Table View Controller. The compile errors will then go away.
 
@@ -182,63 +182,63 @@ In order for the user to pick an image for the classification you will implement
 
     Close the `Main.storyboard` and open the `OverviewViewController.swift` class, add the following line of code directly below the `private let showCustomerDetailSegue = "showCustomerDetails"` line:
 
-    ```Swift
+   ```Swift
 
-    private let showProductClassificationSegue = "showProductClassification"
+   private let showProductClassificationSegue = "showProductClassification"
 
-    ```
+   ```
 
 7. You have to make sure that the selected image later on get's passed on to the `ProductClassificationTableViewController` for the classification process.
 
     Locate the `prepare(for:sender:)` method and add a new if statement to it:
 
-    ```Swift[28-32]
+   ```Swift[28-32]
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Implement a switch over the segue identifiers to distinct which segue get's called.
-        if segue.identifier == showCustomerDetailSegue {
+   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+       // Implement a switch over the segue identifiers to distinct which segue get's called.
+       if segue.identifier == showCustomerDetailSegue {
 
-            // Show the selected Customer on the Detail view
-            guard let indexPath = self.tableView.indexPathForSelectedRow else {
-                return
-            }
+           // Show the selected Customer on the Detail view
+           guard let indexPath = self.tableView.indexPathForSelectedRow else {
+               return
+           }
 
-            // Retrieve the selected customer
-            let selectedEntity = self.customers[indexPath.row]
+           // Retrieve the selected customer
+           let selectedEntity = self.customers[indexPath.row]
 
-            // Get an instance of the CustomerDetailTableViewController with asking the segue for it's destination.
-            let detailViewController = segue.destination as! CustomerDetailTableViewController
+           // Get an instance of the CustomerDetailTableViewController with asking the segue for it's destination.
+           let detailViewController = segue.destination as! CustomerDetailTableViewController
 
-            // Check if the customer ID is set, if not handle the errors and notify the user.
-            guard let customerID = selectedEntity.customerID else {
-                AlertHelper.displayAlert(with: "We're having issues displaying the details for the customer with name \(selectedEntity.lastName ?? "")", error: nil, viewController: self)
-                self.logger.error("Unexpectedly customerID is nil! Can't pass customerID into CustomerDetailViewController.")
-                return
-            }
+           // Check if the customer ID is set, if not handle the errors and notify the user.
+           guard let customerID = selectedEntity.customerID else {
+               AlertHelper.displayAlert(with: "We're having issues displaying the details for the customer with name \(selectedEntity.lastName ?? "")", error: nil, viewController: self)
+               self.logger.error("Unexpectedly customerID is nil! Can't pass customerID into CustomerDetailViewController.")
+               return
+           }
 
-            // Set the customer ID at the CustomerDetailTableViewController.
-            detailViewController.customerId = customerID
+           // Set the customer ID at the CustomerDetailTableViewController.
+           detailViewController.customerId = customerID
 
-            // Set the title of the navigation item on the CustomerDetailTableViewController
-            detailViewController.navigationItem.title = "\(self.customers[indexPath.row].firstName ?? ""), \(self.customers[indexPath.row].lastName ?? "")"
-        } else if segue.identifier == showProductClassificationSegue {
-            let navController = segue.destination as! UINavigationController
-            let productPredictionVC = navController.children.first! as! ProductClassificationTableViewController
-            productPredictionVC.image = pickedImage
-        }
-    }
+           // Set the title of the navigation item on the CustomerDetailTableViewController
+           detailViewController.navigationItem.title = "\(self.customers[indexPath.row].firstName ?? ""), \(self.customers[indexPath.row].lastName ?? "")"
+       } else if segue.identifier == showProductClassificationSegue {
+           let navController = segue.destination as! UINavigationController
+           let productPredictionVC = navController.children.first! as! ProductClassificationTableViewController
+           productPredictionVC.image = pickedImage
+       }
+   }
 
-    ```
+   ```
 
 8. Remember that you want to pass on the selected image to the `ProductClassificationTableViewController`. You have to implement that property to the `ProductClassificationTableViewController` class first to make the compiler happy.
 
     Open the `ProductClassificationTableViewController` class and add the following line of code right above the `viewDidLoad(_:)` method:
 
-    ```Swift
+   ```Swift
 
-    var image: UIImage!
+   var image: UIImage!
 
-    ```
+   ```
 
 [DONE]
 [ACCORDION-END]
@@ -249,65 +249,65 @@ When the user taps on the Bar Button Item it should show an Action Sheet or a Po
 
 1. Open the `OverviewViewController.swift` class and add the following line of code to the `viewDidLoad(_:)`:
 
-    ```Swift[16]
+   ```Swift[16]
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+   override func viewDidLoad() {
+       super.viewDidLoad()
 
-        self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
+       self.view.backgroundColor = .preferredFioriColor(forStyle: .backgroundBase)
 
-        // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
-        // This will cause the Table View to display a cell for at least 80 points.
-        tableView.estimatedRowHeight = 80
-        tableView.rowHeight = UITableView.automaticDimension
+       // Define the estimated row height for each row as well as setting the actual row height to define it's dimension itself.
+       // This will cause the Table View to display a cell for at least 80 points.
+       tableView.estimatedRowHeight = 80
+       tableView.rowHeight = UITableView.automaticDimension
 
-        // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
-        tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
-        tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
+       // Register an FUIObjectTableViewCell and a FUITableViewHeaderFooterView. You can use the convenience reuse identifier defined in the cell classes to later dequeue the cells.
+       tableView.register(FUIObjectTableViewCell.self, forCellReuseIdentifier: FUIObjectTableViewCell.reuseIdentifier)
+       tableView.register(FUITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: FUITableViewHeaderFooterView.reuseIdentifier)
 
-        // Using the FUI Icon Library
-        actionListButton.image = FUIIconLibrary.system.more
+       // Using the FUI Icon Library
+       actionListButton.image = FUIIconLibrary.system.more
 
-        setupImagePicker()
-        loadInitialData()
-    }
+       setupImagePicker()
+       loadInitialData()
+   }
 
-    ```
+   ```
 
 2. Add the following lines of code to the `didPressActionListButton(_:)` method, read the inline comments carefully:
 
-    ```Swift
+   ```Swift
 
-    // You will use an Action Sheet and Pop-Over on regular mode on iPad
-    // Create an UIAlertController with the preferred style actionSheet
-    let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+   // You will use an Action Sheet and Pop-Over on regular mode on iPad
+   // Create an UIAlertController with the preferred style actionSheet
+   let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
-    // Define the image sources as a tuple having a description and the actual source type
-    let imageSources = [
-        ("Using Camera", UIImagePickerController.SourceType.camera),
-        ("Based on Photo", UIImagePickerController.SourceType.photoLibrary)
-    ]
+   // Define the image sources as a tuple having a description and the actual source type
+   let imageSources = [
+       ("Using Camera", UIImagePickerController.SourceType.camera),
+       ("Based on Photo", UIImagePickerController.SourceType.photoLibrary)
+   ]
 
-    // Iterate over the tuple and create an UIAlertAction accordingly. Add those actions to the alertController
-    for (sourceName, sourceType) in imageSources where UIImagePickerController.isSourceTypeAvailable(sourceType) {
-        alertController.addAction(UIAlertAction(title: "Find Product \(sourceName)", style: .default) { _ in
-            self.pickerController.sourceType = sourceType
-            self.present(self.pickerController, animated: true)
-        })
-    }
+   // Iterate over the tuple and create an UIAlertAction accordingly. Add those actions to the alertController
+   for (sourceName, sourceType) in imageSources where UIImagePickerController.isSourceTypeAvailable(sourceType) {
+       alertController.addAction(UIAlertAction(title: "Find Product \(sourceName)", style: .default) { _ in
+           self.pickerController.sourceType = sourceType
+           self.present(self.pickerController, animated: true)
+       })
+   }
 
-    // Add a cancel action as well for the user to cancel the alertController
-    alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+   // Add a cancel action as well for the user to cancel the alertController
+   alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-    // If in a regular layout on iPad, show as a popover
-    if let popoverController = alertController.popoverPresentationController {
-        popoverController.barButtonItem = sender
-    }
+   // If in a regular layout on iPad, show as a popover
+   if let popoverController = alertController.popoverPresentationController {
+       popoverController.barButtonItem = sender
+   }
 
-    // Present the alertController
-    self.present(alertController, animated: true)
+   // Present the alertController
+   self.present(alertController, animated: true)
 
-    ```
+   ```
 
     All the needed code is now implemented for the user to choose a picture from the Photo Library or if running on an actual device take a picture with the device's camera.
 
@@ -346,13 +346,13 @@ Right now the user has no possibility to navigate back from the Product Classifi
 
 3. Close the **Assistant Editor** and open the `ProductClassificationTableViewController.swift` class. Locate the `doneButtonTapped(_:)` method and add the following line of code, responsible for dismissing this modally presented Table View Controller:
 
-    ```Swift
+   ```Swift
 
-    @IBAction func doneButtonTapped(_ sender: UIBarButtonItem) {
-          self.dismiss(animated: true)
-      }
+   @IBAction func doneButtonTapped(_ sender: UIBarButtonItem) {
+         self.dismiss(animated: true)
+     }
 
-    ```
+   ```
 
 [DONE]
 [ACCORDION-END]
